@@ -28,7 +28,7 @@ body {
 /* === Containers === */
 .app-shell {
   width: 100%;
-  max-width: 440px;
+  max-width: 540px;
   background: #ffffff;
   border-radius: 20px;
   border: 1px solid var(--border-subtle);
