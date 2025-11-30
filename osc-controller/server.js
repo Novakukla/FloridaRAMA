@@ -45,12 +45,13 @@ function buildOscMessage(address, value) {
 /**
  * Serve static file from /public (falls back to index.html).
  */
-function serveStatic(urlPath, res) {
-  let filePath = urlPath;
-  if (urlPath === '/' || urlPath === '') {
-    filePath = '/index.html';
-  }
-  const absPath = path.join(PUBLIC_DIR, filePath);
+  function serveStatic(urlPath, res) {
+    let filePath = urlPath;
+    if (urlPath === '/' || urlPath === '') {
+     filePath = '/main.html';   // 👈 your new main file
+    }
+    const absPath = path.join(PUBLIC_DIR, filePath);
+
   fs.readFile(absPath, (err, data) => {
     if (err) {
       res.writeHead(404, { 'Content-Type': 'text/plain' });
