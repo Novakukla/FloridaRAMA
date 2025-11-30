@@ -48,7 +48,7 @@ function buildOscMessage(address, value) {
   function serveStatic(urlPath, res) {
     let filePath = urlPath;
     if (urlPath === '/' || urlPath === '') {
-     filePath = '/main.html';   // 👈 your new main file
+     filePath = '/main.html';  
     }
     const absPath = path.join(PUBLIC_DIR, filePath);
 
@@ -82,7 +82,7 @@ function buildOscMessage(address, value) {
  const RESOLUME_CLEAR_DELAY_MS = 60000; // same as RESOLUME_CLEAR_DELAY in firmware
 
  function triggerStormSequence() {
-   console.log('⚡ Running Storm Sequence (cat-caller style)...');
+   console.log('calling cat caller...');
 
    function sendOscTo(address, value, ip, port) {
      const buf = buildOscMessage(address, value);
@@ -107,7 +107,7 @@ function buildOscMessage(address, value) {
    // 3️⃣ After RESOLUME_CLEAR_DELAY_MS, send final clear: /composition/layers/2/clear i 1
    setTimeout(() => {
      sendOscTo('/composition/layers/2/clear', 1, '10.1.10.151', 7000);
-     console.log('🌧️ Storm sequence complete (final clear sent).');
+     console.log('Storm sequence complete (final clear sent).');
    }, RESOLUME_CLEAR_DELAY_MS);
  }
 
@@ -125,7 +125,6 @@ const server = http.createServer((req, res) => {
           throw new Error('Invalid address');
         }
 
-        // 🔥 special case: storm macro
         if (address === '/storm/trigger') {
           triggerStormSequence();
           res.writeHead(200, { 'Content-Type': 'application/json' });

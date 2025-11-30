@@ -12,8 +12,8 @@
 
   <link rel="stylesheet" href="style.css">
 
-  
 </head>
+
 <body>
   <div class="app-shell">
     <header>
@@ -25,12 +25,20 @@
       <!-- Quick Actions -->
       <div class="pad-global">
         <h2>Quick Actions <span class="badge">Global</span></h2>
-        <div class="wide-stack">
-          <!-- Trigger Storm -->
-          <button class="wide-btn idle" onclick="triggerStorm()">
+
+        <!-- Storm Trigger + Lock -->
+        <div class="storm-row">
+          <button 
+            id="stormBtn"
+            class="wide-btn idle storm-btn locked"
+            onclick="handleStormClick()"
+            onclick="toggleStormLock()"
+            disabled
+          >
             <span class="label-main">Trigger Storm</span>
           </button>
         </div>
+
         <div class="status-row" style="margin-top:8px;">
           Sends <code>/storm/trigger</code> via bridge.
         </div>
@@ -38,8 +46,9 @@
 
       <!-- Controllers -->
       <div class="lr-container">
+
         <div class="pad">
-          <h2>Snail Eyes </h2><span class="badge">Controller</span>
+          <h2>Snail Eyes</h2><span class="badge">Controller</span>
           <div class="wide-stack">
             <a class="wide-btn home" href="becEyes/snail.html" style="text-decoration:none;">
               <span class="label-main">Open</span>
@@ -48,7 +57,7 @@
         </div>
 
         <div class="pad">
-          <h2>Gator Eyes </h2><span class="badge">Controller</span>
+          <h2>Gator Eyes</h2><span class="badge">Controller</span>
           <div class="wide-stack">
             <a class="wide-btn home" href="becEyes/gator.html" style="text-decoration:none;">
               <span class="label-main">Open</span>
@@ -57,7 +66,7 @@
         </div>
 
         <div class="pad">
-          <h2>Panther Eyes </h2><span class="badge">Controller</span>
+          <h2>Panther Eyes</h2><span class="badge">Controller</span>
           <div class="wide-stack">
             <a class="wide-btn home" href="becEyes/panther.html" style="text-decoration:none;">
               <span class="label-main">Open</span>
@@ -68,7 +77,6 @@
       </div>
     </div>
   </div>
-
   <script>
     function sendOSC(address, value = 1) {
       fetch('/osc', {
@@ -78,8 +86,46 @@
       }).catch((err) => console.error(err));
     }
 
-    function triggerStorm() { sendOSC('/storm/trigger', 1); }
- 
+    // -----------------------------------------
+    // AUTO-LOCKING STORM BUTTON
+    // -----------------------------------------
+
+    let stormLocked = false;      // default locked
+    const AUTO_UNLOCK_MS = 60000;
+
+    function applyStormState() {
+      const stormBtn = document.getElementById("stormBtn");
+
+      // Storm button state
+      if (stormLocked) {
+        stormBtn.classList.add("locked");
+        stormBtn.disabled = true;
+      } else {
+        stormBtn.classList.remove("locked");
+        stormBtn.disabled = false;
+      }
+    }
+
+    // Trigger Storm handler
+    function handleStormClick() {
+      if (stormLocked) return;
+
+      // Fire storm OSC
+      sendOSC('/storm/trigger', 1);
+
+      // Immediately lock storm button + disable lock button
+      stormLocked = true;
+      applyStormState();
+
+      // but keep storm locked (requires manual unlock again)
+      setTimeout(() => {
+        applyStormState();
+      }, AUTO_UNLOCK_MS);
+      stormLocked = false;
+    }
+
+    window.addEventListener("DOMContentLoaded", applyStormState);
   </script>
+
 </body>
 </html>

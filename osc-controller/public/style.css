@@ -211,6 +211,21 @@ button {
   margin-top: 4px;
 }
 
+/* --- Storm Lock Additions --- */
+
+.storm-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.storm-btn.locked {
+  background: #d1d5db !important;
+  color: #6b7280 !important;
+  box-shadow: none !important;
+  cursor: not-allowed !important;
+}
 
 
 code {
