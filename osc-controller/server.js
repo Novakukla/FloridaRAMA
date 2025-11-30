@@ -78,36 +78,39 @@ function buildOscMessage(address, value) {
  *   (wait a bit)
  *   oscsend 10.1.10.151 7000 /composition/layers/2/clear i 1
  */
-function triggerStormSequence() {
-  console.log('⚡ Running Storm Sequence...');
+ // Match cat-caller firmware timing: 60s delay before final clear
+ const RESOLUME_CLEAR_DELAY_MS = 60000; // same as RESOLUME_CLEAR_DELAY in firmware
 
-  function sendOscTo(address, value, ip, port) {
-    const buf = buildOscMessage(address, value);
-    udpSocket.send(buf, 0, buf.length, port, ip, (err) => {
-      if (err) {
-        console.error('OSC send error to', `${ip}:${port}`, address, err);
-      } else {
-        console.log('OSC sent to', `${ip}:${port}`, address, value);
-      }
-    });
-  }
+ function triggerStormSequence() {
+   console.log('⚡ Running Storm Sequence (cat-caller style)...');
 
-  // 1. Reset layer
-  sendOscTo('/composition/layers/2/clear', 0, '10.1.10.151', 7000);
+   function sendOscTo(address, value, ip, port) {
+     const buf = buildOscMessage(address, value);
+     udpSocket.send(buf, 0, buf.length, port, ip, (err) => {
+       if (err) {
+         console.error('OSC send error to', `${ip}:${port}`, address, err);
+       } else {
+         console.log('OSC sent to', `${ip}:${port}`, address, value);
+       }
+     });
+   }
 
-  // 2. Trigger cat-caller win
-  sendOscTo('/bkwt/van/cat-caller/win', 1, '10.1.10.101', 7070);
+   // 0️⃣ Notify Reactor of win (matches olimexLAN->sendOSC("/bkwt/van/cat-caller/win"))
+   sendOscTo('/bkwt/van/cat-caller/win', 1, '10.1.10.101', 7070);
 
-  // 3. Small delay, then trigger storm clip
-  setTimeout(() => {
-    sendOscTo('/composition/layers/2/clips/1/connect', 1, '10.1.10.151', 7000);
-  }, 200);
+   // 1️⃣ Reset layer: /composition/layers/2/clear i 0
+   sendOscTo('/composition/layers/2/clear', 0, '10.1.10.151', 7000);
 
-  // 4. After a few seconds, clear layer again
-  setTimeout(() => {
-    sendOscTo('/composition/layers/2/clear', 1, '10.1.10.151', 7000);
-  }, 3000);
-}
+   // 2️⃣ Trigger storm clip: /composition/layers/2/clips/1/connect i 1
+   sendOscTo('/composition/layers/2/clips/1/connect', 1, '10.1.10.151', 7000);
+
+   // 3️⃣ After RESOLUME_CLEAR_DELAY_MS, send final clear: /composition/layers/2/clear i 1
+   setTimeout(() => {
+     sendOscTo('/composition/layers/2/clear', 1, '10.1.10.151', 7000);
+     console.log('🌧️ Storm sequence complete (final clear sent).');
+   }, RESOLUME_CLEAR_DELAY_MS);
+ }
+
 
 // HTTP server
 const server = http.createServer((req, res) => {
