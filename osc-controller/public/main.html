@@ -32,7 +32,7 @@
           </button>
         </div>
         <div class="status-row" style="margin-top:8px;">
-          Sends <code>/storm/trigger</code>, <code>/eye/reset</code>, and <code>/eye/idle</code> via bridge.
+          Sends <code>/storm/trigger</code> via bridge.
         </div>
       </div>
 
@@ -78,10 +78,8 @@
       }).catch((err) => console.error(err));
     }
 
-    function triggerStorm() {
-      // If you want a confirm toggle later, we can add it; for now: fire and forget
-      sendOSC('/storm/trigger', 1);
-    }
+    function triggerStorm() { sendOSC('/storm/trigger', 1); }
+ 
   </script>
 </body>
 </html>

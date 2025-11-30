@@ -7,7 +7,7 @@
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="../style.css">
 
-  <title>Snail Eye Controller</title>
+  <title>Gator Eye Controller</title>
   </head>
     <body>
       <main class="app-shell">
@@ -15,11 +15,11 @@
           <a href="../main.html" style="text-decoration:none;"> <img class="home-btn" src="../images/home.png"> </a>
           <br>
 
-          <h1>Snail Eye Controller</h1>
-          <p>Tap to nudge each eye, then use Home or Idle to let the snail do its thing.</p>
+          <h1>Gator Eye Controller</h1>
+          <p>Tap to nudge each eye, then use Home or Idle to let the gator do its thing.</p>
         </header>
 
-        <!-- ========================== Main Controls ========================== -->
+        <!-- ========================= Left/Right Controls ========================= -->
         <div class="lr-container">
           <section class="pad">
             <h2>
@@ -40,6 +40,21 @@
             <div class="controls">
               <button class="eye-btn left" onclick="sendOSC('/eye/left/right', 1)">◀</button>
               <button class="eye-btn right" onclick="sendOSC('/eye/left/left', 1)">▶</button>
+            </div>
+          </section>
+        </div>
+        <br>
+
+        <!-- ========================== Up/Down Controls ========================== -->
+        <div class="lr-container">
+          <section class="pad">
+            <h2>
+              Up/Down
+              <span class="badge">Channel</span>
+            </h2>
+            <div class="controls">
+              <button class="eye-btn left" onclick="sendOSC('/gator/eye/up', 1)">⯅</button>
+              <button class="eye-btn right" onclick="sendOSC('/gator/eye/down', 1)">▼</button>
             </div>
           </section>
         </div>

@@ -100,32 +100,45 @@ function serveStatic(urlPath, res) {
 // Create the HTTP server
 const server = http.createServer((req, res) => {
   if (req.method === 'POST' && req.url === '/osc') {
-    // Collect request body
     let body = '';
     req.on('data', chunk => {
       body += chunk.toString();
     });
     req.on('end', () => {
       try {
-        const { address, value } = JSON.parse(body);
+        const { address, value } = JSON.parse(body || '{}');
+
         if (typeof address !== 'string') {
           throw new Error('Invalid address');
         }
-        // Convert value to integer; allow floats but truncate
+
+        // 🔥 special case: storm sequence, ignore value and DON’T send to OSC_TARGET_IP
+        if (address === '/storm/trigger') {
+          triggerStormSequence();
+          res.writeHead(200, { 'Content-Type': 'application/json' });
+          res.end(JSON.stringify({ ok: true, storm: true }));
+          return;
+        }
+
+        // normal single-destination behavior (snail eyes etc.)
         const intVal = parseInt(value);
         if (isNaN(intVal)) {
           throw new Error('Invalid value');
         }
+
         const buf = buildOscMessage(address, intVal);
         udpSocket.send(buf, 0, buf.length, OSC_TARGET_PORT, OSC_TARGET_IP, (err) => {
           if (err) {
             console.error('OSC send error:', err);
+          } else {
+            console.log('OSC sent to', OSC_TARGET_IP + ':' + OSC_TARGET_PORT, address, intVal);
           }
         });
-        res.writeHead(200, {'Content-Type': 'application/json'});
+
+        res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
       } catch (e) {
-        res.writeHead(400, {'Content-Type': 'application/json'});
+        res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: false, error: e.message }));
       }
     });
