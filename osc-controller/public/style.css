@@ -85,7 +85,7 @@ header p {
   justify-content: space-between;
 }
 
-.pad { width: 100%; max-width: 150px; align-items: center; }
+.pad { width: 100%; max-width: 125px; align-items: center; }
 .pad-global { width: 100%; align-items: stretch; }
 
 .pad h2, .pad-global h2 {
@@ -97,7 +97,7 @@ header p {
   justify-content: space-between;
 }
 
-.pad h2 span.badge, .pad-global h2 span.badge {
+.badge, .pad-global h2 .badge {
   font-size: 0.7rem;
   text-transform: uppercase;
   letter-spacing: 0.08em;
@@ -169,8 +169,8 @@ button {
 /* === Eye Direction Buttons (Snail Controller) === */
 
 .eye-btn {
-  width: 58px;
-  height: 58px;
+  width: 48px;
+  height: 48px;
   border-radius: 50%;
   font-size: 1.6rem;
   background: radial-gradient(circle at 30% 20%, #ffffff, #e5f4ff);
