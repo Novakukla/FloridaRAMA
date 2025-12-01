@@ -17,8 +17,10 @@ const PUBLIC_DIR = path.join(__dirname, 'public');
 // UDP socket for OSC
 const udpSocket = dgram.createSocket('udp4');
 
-function buildOscMessage(address, value) {
-  function pad4(buf) {
+function buildOscMessage(address, value) 
+{
+  function pad4(buf) 
+  {
     const padding = (4 - (buf.length % 4)) % 4;
     if (padding === 0) return buf;
     return Buffer.concat([buf, Buffer.alloc(padding)]);
@@ -33,28 +35,29 @@ function buildOscMessage(address, value) {
 }
 
 /* === serve static file === */
-  function serveStatic(urlPath, res) {
+  function serveStatic(urlPath, res) 
+  {
     let filePath = urlPath;
-    if (urlPath === '/' || urlPath === '') {
-     filePath = '/main.html';  
-    }
+    if (urlPath === '/' || urlPath === '') { filePath = '/main.html'; }
     const absPath = path.join(PUBLIC_DIR, filePath);
 
-  fs.readFile(absPath, (err, data) => {
-    if (err) {
-      res.writeHead(404, { 'Content-Type': 'text/plain' });
-      res.end('Not found');
-      return;
-    }
-    let contentType = 'text/plain';
-    if (filePath.endsWith('.html')) contentType = 'text/html';
-    else if (filePath.endsWith('.css')) contentType = 'text/css';
-    else if (filePath.endsWith('.js')) contentType = 'application/javascript';
+    fs.readFile(absPath, (err, data) => 
+    {
+      if (err) 
+      {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('Not found');
+        return;
+      }
+      let contentType = 'text/plain';
+      if (filePath.endsWith('.html')) contentType = 'text/html';
+      else if (filePath.endsWith('.css')) contentType = 'text/css';
+      else if (filePath.endsWith('.js')) contentType = 'application/javascript';
 
-    res.writeHead(200, { 'Content-Type': contentType });
-    res.end(data);
-  });
-}
+      res.writeHead(200, { 'Content-Type': contentType });
+      res.end(data);
+    });
+  }
 
 /*
  * Console equivalents:
@@ -66,68 +69,70 @@ function buildOscMessage(address, value) {
  */
  const RESOLUME_CLEAR_DELAY_MS = 60000;
 
- function triggerStormSequence() {
+ function triggerStormSequence() 
+  {
    console.log('calling cat caller...');
 
-   function sendOscTo(address, value, ip, port) {
+   function sendOscTo(address, value, ip, port) 
+   {
      const buf = buildOscMessage(address, value);
-     udpSocket.send(buf, 0, buf.length, port, ip, (err) => {
-       if (err) {
-         console.error('OSC send error to', `${ip}:${port}`, address, err);
-       } else {
-         console.log('OSC sent to', `${ip}:${port}`, address, value);
-       }
-     });
+     udpSocket.send(buf, 0, buf.length, port, ip, (err) => 
+    {
+    if (err) { console.error('OSC send error to', `${ip}:${port}`, address, err); }
+    else 
+      { console.log('OSC sent to', `${ip}:${port}`, address, value); }
+    });
    }
    sendOscTo('/bkwt/van/cat-caller/win', 1, '10.1.10.101', 7070);
    sendOscTo('/composition/layers/2/clear', 0, '10.1.10.151', 7000);
    sendOscTo('/composition/layers/2/clips/1/connect', 1, '10.1.10.151', 7000);
 
-   setTimeout(() => {
+   setTimeout(() => 
+   {
      sendOscTo('/composition/layers/2/clear', 1, '10.1.10.151', 7000);
      console.log('Storm sequence complete (final clear sent).');
    }, RESOLUME_CLEAR_DELAY_MS);
- }
+  }
 
 
 // HTTP server
-const server = http.createServer((req, res) => {
-  if (req.method === 'POST' && req.url === '/osc') {
+const server = http.createServer((req, res) => 
+{
+  if (req.method === 'POST' && req.url === '/osc') 
+  {
     let body = '';
     req.on('data', (chunk) => { body += chunk.toString(); });
-    req.on('end', () => {
-      try {
+    req.on('end', () => 
+    {
+      try 
+      {
         const { address, value } = JSON.parse(body || '{}');
 
-        if (typeof address !== 'string') {
-          throw new Error('Invalid address');
-        }
+        if (typeof address !== 'string') { throw new Error('Invalid address'); }
 
-        if (address === '/storm/trigger') {
+        if (address === '/storm/trigger') 
+        {
           triggerStormSequence();
           res.writeHead(200, { 'Content-Type': 'application/json' });
           res.end(JSON.stringify({ ok: true, storm: true }));
           return;
         }
 
-        // Normal single-target OSC (snail eyes etc.)
         const intVal = parseInt(value);
-        if (isNaN(intVal)) {
-          throw new Error('Invalid value');
-        }
+        if (isNaN(intVal)) { throw new Error('Invalid value'); }
 
         const buf = buildOscMessage(address, intVal);
-        udpSocket.send(buf, 0, buf.length, OSC_TARGET_PORT, OSC_TARGET_IP, (err) => {
-          if (err) {
-            console.error('OSC send error:', err);
-          } else {
-            console.log('OSC sent to', `${OSC_TARGET_IP}:${OSC_TARGET_PORT}`, address, intVal);
-          }
+        udpSocket.send(buf, 0, buf.length, OSC_TARGET_PORT, OSC_TARGET_IP, (err) => 
+        {
+          if (err) { console.error('OSC send error:', err); } 
+          else { console.log('OSC sent to', `${OSC_TARGET_IP}:${OSC_TARGET_PORT}`, address, intVal); }
         });
 
         res.writeHead(200, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: true }));
-      } catch (e) {
+      } 
+      catch (e) 
+      {
         console.error('Request error:', e.message);
         res.writeHead(400, { 'Content-Type': 'application/json' });
         res.end(JSON.stringify({ ok: false, error: e.message }));
@@ -140,7 +145,8 @@ const server = http.createServer((req, res) => {
   serveStatic(req.url, res);
 });
 
-server.listen(HTTP_PORT, () => {
+server.listen(HTTP_PORT, () => 
+{
   console.log(`Server is listening on http://localhost:${HTTP_PORT}`);
   console.log(`OSC messages will be forwarded to ${OSC_TARGET_IP}:${OSC_TARGET_PORT}`);
 });
