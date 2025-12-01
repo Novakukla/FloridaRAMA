@@ -5,7 +5,6 @@
   <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>OSC Control Hub</title>
 
-  <!-- Optional: Baloo 2 font -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&display=swap" rel="stylesheet">
@@ -31,7 +30,6 @@
             id="stormBtn"
             class="wide-btn idle storm-btn locked"
             onclick="handleStormClick()"
-            onclick="toggleStormLock()"
             disabled
           >
             <span class="label-main">Trigger Storm</span>
@@ -72,7 +70,7 @@
             </a>
           </div>
         </div>
-
+        
       </div>
     </div>
   </div>
@@ -88,27 +86,33 @@
     let stormLocked = false;
     const AUTO_UNLOCK_MS = 60000;
 
-    function applyStormState() {
+    function applyStormState() 
+    {
       const stormBtn = document.getElementById("stormBtn");
 
-      if (stormLocked) {
+      if (stormLocked) 
+      {
         stormBtn.classList.add("locked");
         stormBtn.disabled = true;
-      } else {
+      } 
+      else 
+      {
         stormBtn.classList.remove("locked");
         stormBtn.disabled = false;
       }
     }
 
     // Trigger Storm handler
-    function handleStormClick() {
+    function handleStormClick() 
+    {
       if (stormLocked) return;
 
       sendOSC('/storm/trigger', 1);
       stormLocked = true;
       applyStormState();
 
-      setTimeout(() => {
+      setTimeout(() => 
+      {
         stormLocked = false;
         applyStormState();
       }, AUTO_UNLOCK_MS);
