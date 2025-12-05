@@ -1,45 +1,4 @@
-"""
-Asteroid Shooter Game with Touchless Button Input
--------------------------------------------------
-
-This module implements a simplified asteroid shooter game using Pygame.  The
-play field is divided into eight lanes.  Asteroids spawn at the top of these
-lanes and fall towards the bottom of the screen.  The player interacts with
-the game either via physical touchless sensors (e.g. infrared proximity
-sensors connected through an Arduino) or by using the keyboard.  Each lane
-corresponds to one of eight buttons.  Pressing a button fires a laser up
-that lane.  If the laser collides with an asteroid then the asteroid is
-destroyed and the player’s score increases.  Each button has its own
-cool‑down time; pressing a button while its cool‑down is active does
-nothing and prints a message in the UI.
-
-In addition to the eight firing buttons, there are three power‑up buttons
-located at the bottom of the console.  Their functions are:
-
-1. **Reset Cooldowns** – Instantly reset the cool‑down timers of all eight
-   firing buttons.
-2. **Clear Screen** – Remove all asteroids currently on the screen.
-3. **Heal** – Restore some of the player's health (up to a maximum).
-
-Each power‑up has its own cool‑down period.  Attempting to use a power‑up
-while it is cooling down will display an “ability on cooldown” message in
-the UI.
-
-The right side of the screen is reserved for a status panel.  This panel
-shows the player’s current health, score, and the remaining cool‑down time
-for each power‑up.  It also displays transient messages, such as when an
-ability is used while on cool‑down.
-
-To adapt this script for a physical installation, hook up the Arduino
-running the touchless button firmware to a Raspberry Pi via USB.  A
-companion Python script can read the serial output from the Arduino,
-translate button trigger messages into lane and power‑up events, and feed
-them into this game loop.  Until then, the game defaults to keyboard
-controls for testing on a laptop: keys 1–8 correspond to lanes 1–8, and
-keys Q, W and E correspond to the three power‑ups.
-
-Author: Fairgrounds Inc., adapted for Pygame by ChatGPT (2025)
-"""
+""" Nova Kukla | CNSL-Drum replacement """
 
 import random
 import sys
