@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Choose Your Mood – Candy Matcher</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-color: #3db489; /* green background like previous design */
+      --card-bg: #f47948; /* orange card background */
+      --btn-bg: #36a8de; /* blue button */
+      --text-color: #fff; /* white text */
+      --border-radius: 18px;
+    }
+    *, *::before, *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      padding: 20px 12px 40px;
+      min-height: 100vh;
+      font-family: "Baloo 2", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      background: var(--bg-color);
+      color: var(--text-color);
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    h1 {
+      text-align: center;
+      margin-top: 0;
+      font-size: 2rem;
+      margin-bottom: 20px;
+    }
+    .mood-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+      margin: 0 auto 30px;   
+      max-width: 720px;     
+    }
+    .mood-card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 16px;
+      text-align: center;
+      cursor: pointer;
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+      user-select: none;
+    }
+    .mood-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.2);
+    }
+    .mood-card.selected {
+      outline: 4px solid var(--btn-bg);
+    }
+    .mood-emoji {
+      font-size: 2rem;
+      margin-bottom: 8px;
+    }
+    .mood-label {
+      font-size: 1rem;
+      font-weight: 600;
+    }
+    .actions {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .primary-btn {
+      background: var(--btn-bg);
+      color: #fff;
+      border: none;
+      border-radius: 999px;
+      padding: 12px 24px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      text-transform: uppercase;
+      letter-spacing: 0.03em;
+    }
+    .primary-btn:disabled {
+      opacity: 0.5;
+      cursor: default;
+    }
+    .result-card {
+      background: var(--card-bg);
+      border-radius: var(--border-radius);
+      padding: 20px;
+      margin-top: 20px;
+      text-align: center;
+    }
+    .result-list {
+      list-style: none;
+      padding: 0;
+      margin: 0;
+    }
+    .result-item {
+      margin-bottom: 12px;
+      font-size: 1.2rem;
+      font-weight: 600;
+    }
+    .error-message {
+      color: #fcd34d;
+      font-size: 0.9rem;
+      margin-top: 8px;
+    }
+
+	@media (max-width: 640px) {
+		.mood-grid {
+			grid-template-columns: repeat(2, 1fr);
+		}
+		.desktop-only {
+			display: none !important;
+		}
+		.mood-emoji {
+		  font-size: 1.5rem;
+		  margin-bottom: 8px;
+		}
+		.mood-label {
+		  font-size: .75rem;
+		  font-weight: 600;
+		}
+	}
+
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Choose Your Mood</h1>
+    <p style="text-align:center;margin-top:-10px;margin-bottom:20px;">Select up to two moods and we'll match the perfect candy for you!</p>
+    <div class="mood-grid" id="moodGrid">
+      <!-- Mood cards will be injected here by JS -->
+    </div>
+    <div class="actions">
+      <button id="submitBtn" class="primary-btn" disabled>Find My Candy</button>
+      <div id="errorMsg" class="error-message"></div>
+    </div>
+    <div id="resultContainer"></div>
+  </div>
+  <script>
+    (function() {
+      const moods = [
+        { id:'happy',       label:'Happy',       emoji:'😊', candies:['Skittles','Skittles tropical'] },
+        { id:'adventurous', label:'Adventurous', emoji:'🌟', candies:['Skittles sour','Crunch'] },
+        { id:'nostalgic',   label:'Nostalgic',   emoji:'🕰', candies:['Whoppers',"Reese's pieces"] },
+        { id:'romantic',    label:'Romantic',    emoji:'💕', candies:['Snickers','Almond Joy'] },
+        { id:'creative',    label:'Creative',    emoji:'🎨', candies:['Razzles','Twix'] },
+        { id:'bold',        label:'Bold',        emoji:'💪', candies:['Crunch','Snickers'] },
+        { id:'playful',     label:'Playful',     emoji:'🤹', candies:["Reese's pieces",'Skittles'] },
+        { id:'relaxed',     label:'Relaxed',     emoji:'😌', candies:['Twix','Almond Joy'] },
+        { id: 'energetic',   label: 'Energetic',   emoji: '⚡', candies: ['Snickers', 'Almond Joy'] }
+      ];
+
+      const candyImages = {
+        'Twix': 'https://static.wixstatic.com/media/400eb0_3fcd24a92c084e6082c60e76409f833c~mv2.png',
+        'Whoppers': 'https://static.wixstatic.com/media/400eb0_fb8fedeef8b441a6bf9b491a884cf8f0~mv2.png',
+        'Skittles tropical': 'https://static.wixstatic.com/media/400eb0_2d711177fc67495590bbaa56dc5fc03a~mv2.png',
+        'Skittles sour': 'https://static.wixstatic.com/media/400eb0_0c170a3304b643e7906d20a1afbf0a92~mv2.png',
+        'Sour skittles': 'https://static.wixstatic.com/media/400eb0_0c170a3304b643e7906d20a1afbf0a92~mv2.png',
+        'Snickers': 'https://static.wixstatic.com/media/400eb0_46b3941d42ce46dd96cb342396684dd1~mv2.png',
+        'Skittles': 'https://static.wixstatic.com/media/400eb0_b0c51f2cfe2a410fa99f303f93e65c3f~mv2.png',
+        'Crunch': 'https://static.wixstatic.com/media/400eb0_b94412d3a319444d938cd593b20a1b07~mv2.png',
+        'Razzles': 'https://static.wixstatic.com/media/400eb0_b9e3ed49f11849e1b61b47650dee7338~mv2.png',
+        "Reese's pieces": 'https://static.wixstatic.com/media/400eb0_afecddc748fe42dbb91811efe3d8bb66~mv2.png',
+        'Reeses pieces': 'https://static.wixstatic.com/media/400eb0_afecddc748fe42dbb91811efe3d8bb66~mv2.png',
+        'Almond Joy': 'https://static.wixstatic.com/media/400eb0_19ee2fd9d53a482fa3f9ffd5ad110fc9~mv2.png'
+      };
+
+      const moodGrid = document.getElementById('moodGrid');
+      const submitBtn = document.getElementById('submitBtn');
+      const errorMsg = document.getElementById('errorMsg');
+      const resultContainer = document.getElementById('resultContainer');
+      let selectedMoodIds = [];
+
+      // Render mood cards
+      moods.forEach((mood) => {
+        const card = document.createElement('div');
+        card.className = 'mood-card';
+        if (mood.id === "energetic") card.classList.add("desktop-only");
+        card.dataset.id = mood.id;
+        card.innerHTML = `
+          <div class="mood-emoji">${mood.emoji}</div>
+          <div class="mood-label">${mood.label}</div>
+        `;
+        card.addEventListener('click', () => toggleMoodSelection(mood.id, card));
+        moodGrid.appendChild(card);
+      });
+
+      function toggleMoodSelection(moodId, cardElement) {
+        const index = selectedMoodIds.indexOf(moodId);
+        if (index >= 0) {
+          // already selected – remove
+          selectedMoodIds.splice(index, 1);
+          cardElement.classList.remove('selected');
+        } else {
+          if (selectedMoodIds.length >= 2) {
+            errorMsg.textContent = 'You can choose up to two moods only.';
+            return;
+          }
+          selectedMoodIds.push(moodId);
+          cardElement.classList.add('selected');
+          errorMsg.textContent = '';
+        }
+        // enable submit button if there is at least one selection
+        submitBtn.disabled = selectedMoodIds.length === 0;
+      }
+
+      function getRandomCandy(candyArray) {
+        return candyArray[Math.floor(Math.random() * candyArray.length)];
+      }
+
+      function handleSubmit() {
+        resultContainer.innerHTML = '';
+        // Determine selected moods
+        const selectedMoods = moods.filter((m) => selectedMoodIds.includes(m.id));
+        if (selectedMoods.length === 0) {
+          errorMsg.textContent = 'Please select at least one mood.';
+          return;
+        }
+        // Build a single result based on selected moods
+        const resultCard = document.createElement('div');
+        resultCard.className = 'result-card';
+
+        // Create a combined pool of candies from the selected moods
+        let combinedCandies = [];
+        selectedMoods.forEach((m) => {
+          combinedCandies = combinedCandies.concat(m.candies);
+        });
+
+        // Choose one candy at random from the combined list
+        const chosenCandy = getRandomCandy(combinedCandies);
+
+        // Compose the result text. Include the names of the moods chosen for context.
+        const moodNames = selectedMoods.map((m) => m.label).join(' + ');
+        // Attempt to find an image for the selected candy.  If none exists,
+        // only the text will be shown.
+        const imageUrl = candyImages[chosenCandy];
+        let resultHtml = `<h2>Your candy match</h2><p><strong>${moodNames}</strong> → ${chosenCandy}</p>`;
+        if (imageUrl) {
+          resultHtml += `<img src="${imageUrl}" alt="${chosenCandy}" style="display:block;margin:10px auto;max-width:200px;height:auto;" />`;
+        }
+        resultCard.innerHTML = resultHtml;
+        resultContainer.appendChild(resultCard);
+      }
+
+      submitBtn.addEventListener('click', handleSubmit);
+    })();
+  </script>
+</body>
+</html>
