@@ -145,19 +145,29 @@
   <script>
     (function() {
       const moods = [
-        { id:'happy',       label:'Happy',       emoji:'😊', candies:['Skittles','Skittles tropical'] },
-        { id:'adventurous', label:'Adventurous', emoji:'🌟', candies:['Skittles sour','Crunch'] },
-        { id:'nostalgic',   label:'Nostalgic',   emoji:'🕰', candies:['Whoppers',"Reese's pieces"] },
-        { id:'romantic',    label:'Romantic',    emoji:'💕', candies:['Snickers','Almond Joy'] },
-        { id:'creative',    label:'Creative',    emoji:'🎨', candies:['Razzles','Twix'] },
-        { id:'bold',        label:'Bold',        emoji:'💪', candies:['Crunch','Snickers'] },
-        { id:'playful',     label:'Playful',     emoji:'🤹', candies:["Reese's pieces",'Skittles'] },
-        { id:'relaxed',     label:'Relaxed',     emoji:'😌', candies:['Twix','Almond Joy'] },
-        { id: 'energetic',   label: 'Energetic',   emoji: '⚡', candies: ['Snickers', 'Almond Joy'] }
+        { id:'happy', label:'Happy', emoji:'😊', candies:['Skittles','Skittles tropical','Haribo Starmix','Gobstopper'] },
+
+        { id:'adventurous', label:'Adventurous', emoji:'🌟', candies:['Skittles sour','Trolli','Nerds','Runts'] },
+
+        { id:'nostalgic', label:'Nostalgic', emoji:'🕰', candies:['Whoppers',"Reese's pieces",'Mallo Cup','Sugar Babies'] },
+
+        { id:'romantic', label:'Romantic', emoji:'💕', candies:['Snickers','Almond Joy','Carmello','Hersheys'] },
+
+        { id:'creative', label:'Creative', emoji:'🎨', candies:['Razzles','Twix','Nerds','Jujyfruits'] },
+
+        { id:'bold', label:'Bold', emoji:'💪', candies:['Crunch','Snickers','Baby Ruth','Oh Henry'] },
+
+        { id:'playful', label:'Playful', emoji:'🤹', candies:["Reese's pieces",'Skittles','Runts','Gobstopper'] },
+
+        { id:'relaxed', label:'Relaxed', emoji:'😌', candies:['Twix','Almond Joy','Junior Mints','Carmello'] },
+
+        // if you’re keeping energetic but hiding on mobile:
+        { id:'energetic', label:'Energetic', emoji:'⚡', candies:['Trolli','Skittles sour','Red Hots','Nerds'] }
       ];
 
+
       const candyImages = {
-        'Twix': 'https://static.wixstatic.com/media/400eb0_3fcd24a92c084e6082c60e76409f833c~mv2.png',
+        'Twix': 'https://static.wixstatic.com/media/400eb0_f07ff68f7eab489e96d13efedfb82e32~mv2.png',
         'Whoppers': 'https://static.wixstatic.com/media/400eb0_fb8fedeef8b441a6bf9b491a884cf8f0~mv2.png',
         'Skittles tropical': 'https://static.wixstatic.com/media/400eb0_2d711177fc67495590bbaa56dc5fc03a~mv2.png',
         'Skittles sour': 'https://static.wixstatic.com/media/400eb0_0c170a3304b643e7906d20a1afbf0a92~mv2.png',
@@ -167,8 +177,23 @@
         'Crunch': 'https://static.wixstatic.com/media/400eb0_b94412d3a319444d938cd593b20a1b07~mv2.png',
         'Razzles': 'https://static.wixstatic.com/media/400eb0_b9e3ed49f11849e1b61b47650dee7338~mv2.png',
         "Reese's pieces": 'https://static.wixstatic.com/media/400eb0_afecddc748fe42dbb91811efe3d8bb66~mv2.png',
-        'Reeses pieces': 'https://static.wixstatic.com/media/400eb0_afecddc748fe42dbb91811efe3d8bb66~mv2.png',
-        'Almond Joy': 'https://static.wixstatic.com/media/400eb0_19ee2fd9d53a482fa3f9ffd5ad110fc9~mv2.png'
+        'Reeses pieces': 'https://static.wixstatic.com/media/400eb0_f68242d20fef4a9987ac230afa2902ee~mv2.png',
+        'Almond Joy': 'https://static.wixstatic.com/media/400eb0_19ee2fd9d53a482fa3f9ffd5ad110fc9~mv2.png',
+
+        'Junior Mints': 'https://static.wixstatic.com/media/400eb0_6f11c191a0134c2bbcf4a1c71d983189~mv2.png',
+		'Mallo Cup': 'https://static.wixstatic.com/media/400eb0_0fb2ea4973724c2bac194d5bfb4d1cd6~mv2.png',
+		'Baby Ruth': 'https://static.wixstatic.com/media/400eb0_e1403c21ba6743de915ac88c582f7fd5~mv2.png',
+		'Hersheys': 'https://static.wixstatic.com/media/400eb0_caa547c51af34e3bbccfc74ed8b98a74~mv2.png',
+		'Sugar Babies': 'https://static.wixstatic.com/media/400eb0_c91bd9b196dc473a8ed0106e6f95d74d~mv2.png',
+		'Carmello': 'https://static.wixstatic.com/media/400eb0_31650595429c4d8bb5a34cf2d7306dbe~mv2.png',
+		'Jujyfruits': 'https://static.wixstatic.com/media/400eb0_30318c95fd6c4d7bbab694c19654d4df~mv2.png',
+		'Oh Henry': 'https://static.wixstatic.com/media/400eb0_aa279c0e850e4ffb94c0249316fe8f08~mv2.png',
+		'Haribo Starmix': 'https://static.wixstatic.com/media/400eb0_cfd39db7fa5f4518a4fae0de66ea5e92~mv2.png',
+		'Gobstopper': 'https://static.wixstatic.com/media/400eb0_fe181b83a0b749c5bc961c5e3312d18e~mv2.png',
+		'Red Hots': 'https://static.wixstatic.com/media/400eb0_2a1880f9f0394c4fad02c55a42a3d694~mv2.png',
+		'Runts': 'https://static.wixstatic.com/media/400eb0_919e8f8300a54bc3a1487535c6f47974~mv2.png',
+		'Trolli': 'https://static.wixstatic.com/media/400eb0_ab9feac700774a658ce9ddd4c7fe6960~mv2.png',
+		'Nerds': 'https://static.wixstatic.com/media/400eb0_0350a7797e9945f6ab1ad0bed2fb80cf~mv2.png'
       };
 
       const moodGrid = document.getElementById('moodGrid');
@@ -240,7 +265,23 @@
         // Attempt to find an image for the selected candy.  If none exists,
         // only the text will be shown.
         const imageUrl = candyImages[chosenCandy];
-        let resultHtml = `<h2>Your candy match</h2><p><strong>${moodNames}</strong> → ${chosenCandy}</p>`;
+        let resultHtml = `
+          <h2>Your candy match</h2>
+          <p><strong>${moodNames}</strong> → ${chosenCandy}</p>
+          <p style="margin-top:12px;">
+            🍬 <strong>Lucky for you!</strong> This is available in
+            <strong>Lucy Sparrow’s Sugar Rush</strong>.
+          </p>
+          <p style="margin-top:8px;">
+            <a href="https://www.floridarama.art/tickets" target="_blank"
+               style="display:inline-block;margin-top:10px;padding:10px 18px;
+                      background:#36a8de;color:#fff;border-radius:999px;
+                      text-decoration:none;font-weight:600;">
+              Get tickets now!
+            </a>
+          </p>
+        `;
+
         if (imageUrl) {
           resultHtml += `<img src="${imageUrl}" alt="${chosenCandy}" style="display:block;margin:10px auto;max-width:200px;height:auto;" />`;
         }
