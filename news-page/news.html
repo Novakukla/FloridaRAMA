@@ -1,0 +1,1089 @@
+<!doctype html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<title>FloridaRAMA News</title>
+		<!-- Baloo 2 font (Wix-friendly, used elsewhere in this repo) -->
+		<link rel="preconnect" href="https://fonts.googleapis.com" />
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+		<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet" />
+		<style>
+			:root {
+				/* FloridaRAMA brand palette */
+				--brand-pink: #ef779f;
+				--brand-blue: #36a8de;
+				--brand-green: #3db489;
+				--brand-yellow: #f8c964;
+				--brand-orange: #f47948;
+
+
+
+				--max-width: 980px; /* keep inside Wix tablet gridlines */
+				--pad-x: 16px;
+				--radius: 18px;
+				--border: rgba(255, 255, 255, 0.16);
+				--shadow: 0 18px 40px rgba(0, 0, 0, 0.30);
+				--shadow-soft: 0 10px 26px rgba(0, 0, 0, 0.22);
+				--text: rgba(255, 255, 255, 0.92);
+				--text-dim: rgba(255, 255, 255, 0.72);
+				--card-bg: rgba(10, 10, 12, 0.52);
+				--card-bg-strong: rgba(10, 10, 12, 0.68);
+
+				/* Accent colors used for chips, overlays, highlights */
+				--accent: var(--brand-yellow);
+				--accent2: var(--brand-blue);
+				--ring: 0 0 0 2px rgba(255, 255, 255, 0.16);
+			}
+
+			/* Wix will handle background/parallax; keep transparent */
+			html,
+			body {
+				background: transparent;
+				margin: 0;
+				padding: 0;
+				color: var(--text);
+				font-family: "Baloo 2", system-ui, -apple-system, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+			}
+
+			.wrap {
+				max-width: var(--max-width);
+				margin: 0 auto;
+				padding: 22px var(--pad-x) 34px;
+			}
+
+			.top {
+				display: flex;
+				align-items: flex-end;
+				justify-content: space-between;
+				gap: 16px;
+				margin-bottom: 16px;
+			}
+
+			.title {
+				margin: 0;
+				font-size: clamp(22px, 2.6vw, 34px);
+				letter-spacing: -0.02em;
+				line-height: 1.15;
+			}
+
+			.subtitle {
+				margin: 6px 0 0;
+				color: var(--text-dim);
+				font-size: 14px;
+				line-height: 1.35;
+			}
+
+			.filters {
+				display: flex;
+				flex-wrap: wrap;
+				gap: 10px;
+				align-items: center;
+				justify-content: flex-end;
+			}
+
+			.chip {
+				border: 1px solid rgba(248, 201, 100, 0.55);
+				background: rgba(248, 201, 100, 0.16);
+				color: var(--text);
+				border-radius: 999px;
+				padding: 9px 12px;
+				font-size: 13px;
+				line-height: 1;
+				cursor: pointer;
+				user-select: none;
+				transition: transform 120ms ease, background 160ms ease, border-color 160ms ease;
+			}
+
+			.chip:hover {
+				transform: translateY(-1px);
+				background: rgba(248, 201, 100, 0.22);
+				border-color: rgba(248, 201, 100, 0.78);
+			}
+
+			.chip[aria-pressed="true"] {
+				background: var(--brand-yellow);
+				color: #000;
+				border-color: rgba(0, 0, 0, 0.18);
+				box-shadow: 0 10px 24px rgba(0, 0, 0, 0.25);
+			}
+
+			.grid {
+				display: grid;
+				grid-template-columns: repeat(12, 1fr);
+				gap: 14px;
+				margin-top: 14px;
+			}
+
+			/* Nation News Features: simple text-only list */
+			.simpleList {
+				margin-top: 14px;
+				display: flex;
+				flex-direction: column;
+				gap: 10px;
+			}
+
+			/* Ensure simple/national and local lists span the full grid row */
+			.simpleList,
+			.localGroups {
+				grid-column: 1 / -1;
+				width: 100%;
+			}
+
+			/* Local groups: two-column responsive layout with colored group cards */
+			.localGroups {
+				display: grid;
+				grid-template-columns: repeat(2, 1fr);
+				gap: 14px;
+				margin-top: 14px;
+			}
+
+			@media (max-width: 720px) {
+				.localGroups {
+					grid-template-columns: 1fr;
+				}
+			}
+
+			.groupCard {
+				padding: 12px 14px;
+				border-radius: 14px;
+				color: #000;
+				background: var(--card-fill, var(--brand-blue));
+				border: 1px solid rgba(0,0,0,0.12);
+				box-shadow: 0 10px 22px rgba(0,0,0,0.18);
+			}
+
+			.groupTitle {
+				font-weight: 700;
+				margin: 0 0 8px 0;
+				color: rgba(0,0,0,0.82);
+			}
+
+			.groupLinks {
+				display: flex;
+				flex-direction: column;
+				gap: 8px;
+			}
+
+			.groupLinks a {
+				display: block;
+				padding: 8px 10px;
+				border-radius: 10px;
+				background: rgba(255,255,255,0.86);
+				color: #000;
+				text-decoration: none;
+				font-size: 14px;
+			}
+
+			.groupLinks a:hover {
+				background: rgba(255,255,255,0.96);
+			}
+
+			a.simpleItem {
+				display: flex;
+				gap: 12px;
+				align-items: baseline;
+				justify-content: space-between;
+				padding: 12px 14px;
+				border-radius: 14px;
+				border: 1px solid rgba(255, 255, 255, 0.16);
+				background: var(--card-fill, rgba(10, 10, 12, 0.55));
+				color: #000;
+				text-decoration: none;
+				box-shadow: 0 10px 22px rgba(0, 0, 0, 0.22);
+				transition: transform 120ms ease, background 160ms ease, border-color 160ms ease;
+			}
+
+			a.simpleItem:hover {
+				transform: translateY(-1px);
+				filter: brightness(0.96);
+				border-color: rgba(0, 0, 0, 0.22);
+			}
+
+			.simpleTitle {
+				font-size: 15px;
+				line-height: 1.25;
+				letter-spacing: -0.01em;
+			}
+
+			.simpleMeta {
+				font-size: 12px;
+				color: rgba(0, 0, 0, 0.62);
+				white-space: nowrap;
+				max-width: 42%;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				text-align: right;
+			}
+
+			@media (max-width: 880px) {
+				.top {
+					flex-direction: column;
+					align-items: flex-start;
+				}
+				.filters {
+					justify-content: flex-start;
+				}
+			}
+
+			.card {
+				grid-column: span 6;
+				border: 1px solid rgba(0, 0, 0, 0.18);
+				border-radius: var(--radius);
+				overflow: hidden;
+				background: var(--card-fill, var(--brand-blue));
+				color: #000;
+				box-shadow: var(--shadow-soft);
+				backdrop-filter: blur(0px);
+				-webkit-backdrop-filter: blur(0px);
+				position: relative;
+
+				/* scroll pop-in */
+				opacity: 0;
+				transform: translateY(18px) scale(0.98);
+				transition: opacity 520ms ease, transform 520ms cubic-bezier(0.2, 0.8, 0.2, 1);
+			}
+
+			.card.in-view {
+				opacity: 1;
+				transform: translateY(0) scale(1);
+			}
+
+			@media (max-width: 720px) {
+				.card {
+					grid-column: span 12;
+				}
+			}
+
+			.thumb {
+				aspect-ratio: 16 / 9;
+				width: 100%;
+				display: block;
+				background: rgba(255, 255, 255, 0.08);
+				position: relative;
+				overflow: hidden;
+			}
+
+			/* Articles: only show the strip when there's no thumbnail image */
+			.card[data-type="article"] .thumb.no-img {
+				aspect-ratio: auto;
+				height: 12px;
+				background: var(--strip-color, var(--brand-yellow));
+			}
+
+			.card[data-type="article"] .thumb.no-img::after {
+				background: none;
+			}
+
+			/* No thumbnail available: keep it clean (no placeholder image) */
+			.thumb.no-img {
+				background: rgba(0, 0, 0, 0.10);
+			}
+
+			.thumb img {
+				width: 100%;
+				height: 100%;
+				object-fit: cover;
+				display: block;
+				transform: scale(1.02);
+				filter: saturate(1.05) contrast(1.03);
+				transition: transform 420ms ease, filter 420ms ease;
+			}
+
+			.card:hover .thumb img {
+				transform: scale(1.06);
+				filter: saturate(1.12) contrast(1.06);
+			}
+
+			.thumb::after {
+				content: "";
+				position: absolute;
+				inset: 0;
+				background: rgba(0, 0, 0, 0.30);
+				pointer-events: none;
+			}
+
+			.play {
+				position: absolute;
+				inset: 0;
+				display: grid;
+				place-items: center;
+				pointer-events: none;
+			}
+
+			.play-badge {
+				width: 58px;
+				height: 58px;
+				border-radius: 999px;
+				background: rgba(10, 10, 12, 0.62);
+				border: 1px solid rgba(255, 255, 255, 0.22);
+				box-shadow: 0 18px 40px rgba(0, 0, 0, 0.38);
+				display: grid;
+				place-items: center;
+				transform: translateY(0);
+				transition: transform 220ms ease, background 220ms ease, border-color 220ms ease;
+			}
+
+			.card:hover .play-badge {
+				transform: translateY(-2px) scale(1.02);
+				background: rgba(10, 10, 12, 0.72);
+				border-color: rgba(255, 255, 255, 0.32);
+			}
+
+			.play-badge svg {
+				width: 18px;
+				height: 18px;
+				margin-left: 2px;
+				fill: rgba(255, 255, 255, 0.92);
+			}
+
+			.body {
+				padding: 12px 14px 14px;
+			}
+
+			.meta {
+				display: flex;
+				gap: 10px;
+				align-items: center;
+				justify-content: space-between;
+				margin-bottom: 6px;
+			}
+
+			.tag {
+				font-size: 12px;
+				color: rgba(0, 0, 0, 0.72);
+				border: 1px solid rgba(0, 0, 0, 0.18);
+				padding: 6px 10px;
+				border-radius: 999px;
+				background: rgba(255, 255, 255, 0.35);
+			}
+
+			.source {
+				font-size: 12px;
+				color: rgba(0, 0, 0, 0.62);
+				white-space: nowrap;
+				overflow: hidden;
+				text-overflow: ellipsis;
+				max-width: 52%;
+				text-align: right;
+			}
+
+			.headline {
+				margin: 0;
+				font-size: 15px;
+				line-height: 1.25;
+				letter-spacing: -0.01em;
+			}
+
+			.desc {
+				margin: 8px 0 0;
+				color: rgba(0, 0, 0, 0.70);
+				font-size: 13px;
+				line-height: 1.4;
+			}
+
+			.actions {
+				margin-top: 12px;
+				display: flex;
+				gap: 10px;
+				align-items: center;
+				justify-content: space-between;
+			}
+
+			a.btn,
+			button.btn {
+				appearance: none;
+				border: 1px solid rgba(0, 0, 0, 0.18);
+				background: rgba(255, 255, 255, 0.08);
+				color: var(--text);
+				text-shadow: none;
+				border-radius: 12px;
+				padding: 9px 12px;
+				font-size: 13px;
+				line-height: 1;
+				cursor: pointer;
+				text-decoration: none;
+				display: inline-flex;
+				gap: 8px;
+				align-items: center;
+				transition: transform 120ms ease, background 160ms ease, border-color 160ms ease;
+			}
+
+			a.btn:hover,
+			button.btn:hover {
+				transform: translateY(-1px);
+				background: rgba(255, 255, 255, 0.12);
+				border-color: rgba(0, 0, 0, 0.22);
+			}
+
+			.btn.primary {
+				background: var(--brand-yellow);
+				color: #000;
+				border-color: rgba(0, 0, 0, 0.18);
+			}
+
+			.btn.primary:hover {
+				filter: brightness(0.96);
+			}
+
+			.tiny {
+				color: rgba(0, 0, 0, 0.55);
+				font-size: 12px;
+			}
+
+			/* Modal */
+			.modal {
+				position: fixed;
+				inset: 0;
+				display: none;
+				align-items: center;
+				justify-content: center;
+				padding: 18px;
+				background: rgba(0, 0, 0, 0.66);
+				z-index: 9999;
+			}
+
+			.modal.open {
+				display: flex;
+			}
+
+			.modal-card {
+				width: min(980px, 100%);
+				border-radius: 18px;
+				overflow: hidden;
+				background: rgba(10, 10, 12, 0.92);
+				border: 1px solid rgba(255, 255, 255, 0.18);
+				box-shadow: var(--shadow);
+			}
+
+			.modal-top {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				gap: 12px;
+				padding: 12px 12px;
+			}
+
+			.modal-title {
+				font-size: 14px;
+				color: rgba(255, 255, 255, 0.86);
+				margin: 0;
+				line-height: 1.2;
+			}
+
+			.close {
+				border-radius: 12px;
+				padding: 8px 10px;
+				border: 1px solid rgba(0, 0, 0, 0.18);
+				background: var(--brand-yellow);
+				color: #000;
+				cursor: pointer;
+			}
+
+			.player {
+				width: 100%;
+				aspect-ratio: 16 / 9;
+				background: #000;
+			}
+
+			.player iframe {
+				width: 100%;
+				height: 100%;
+				border: 0;
+				display: block;
+			}
+
+			/* Reduced motion */
+			@media (prefers-reduced-motion: reduce) {
+				.card {
+					transition: none;
+					opacity: 1;
+					transform: none;
+				}
+				.thumb img,
+				.chip,
+				a.btn,
+				button.btn {
+					transition: none;
+				}
+			}
+		</style>
+	</head>
+	<body>
+		<div class="wrap">
+			<div class="top">
+				<div>
+					<h1 class="title">News & Media</h1>
+					<p class="subtitle">Press, features, and video coverage of FloridaRAMA.</p>
+				</div>
+
+				<div class="filters" role="group" aria-label="News filters">
+					<button class="chip" data-filter="all" aria-pressed="true">Spotlight</button>
+					<button class="chip" data-filter="video" aria-pressed="false">Videos</button>
+					<button class="chip" data-filter="article" aria-pressed="false">Articles</button>
+					<button class="chip" data-filter="nation" aria-pressed="false">National News Features</button>
+					<button class="chip" data-filter="local" aria-pressed="false">Local News Features</button>
+				</div>
+			</div>
+
+			<div id="grid" class="grid" aria-live="polite"></div>
+			<div class="tiny" style="margin-top: 14px;">Tip: click a video card to play it, or open any article in a new tab.</div>
+		</div>
+
+		<div id="modal" class="modal" aria-hidden="true">
+			<div class="modal-card" role="dialog" aria-modal="true" aria-label="Video player">
+				<div class="modal-top">
+					<p id="modalTitle" class="modal-title"></p>
+					<button id="modalClose" class="close" type="button">Close</button>
+				</div>
+				<div class="player" id="player"></div>
+			</div>
+		</div>
+
+		<script>
+			/**
+			 * Add/edit items here.
+			 * For YouTube, use full watch URLs; thumbnails are auto-generated.
+			 */
+			const ITEMS = [
+				{
+					type: "article",
+					tag: "Press",
+					title: "Arts Alive! podcast: Artist Lucy Sparrow - St Pete Catalyst",
+					source: "St. Pete Catalyst",
+					url: "https://stpetecatalyst.com/arts-alive-podcast-artist-lucy-sparrow/",
+					thumb: "https://media.stpetecatalyst.com/uploads/2025/12/Arts-Alive-Lucy-Sparrow.jpg",
+					description: "Podcast feature highlighting Lucy Sparrow and FloridaRAMA.",
+				},
+				{
+					type: "article",
+					tag: "Press",
+					title: "Happenings: A&E news and events | Diversions | tbnweekly.com",
+					source: "TBN Weekly",
+					url: "https://www.tbnweekly.com/diversions/article_0cf54cc9-bf8d-4b72-8f0d-40a5f0b643c3.html",
+					thumb: "https://bloximages.newyork1.vip.townnews.com/tbnweekly.com/content/tncms/assets/v3/editorial/4/4d/44d140e2-aadf-4a73-b002-b3b45d4c5ced/692e3e6570c10.image.png?crop=312%2C312%2C52%2C0&resize=200%2C200&order=crop%2Cresize",
+					description: "Local coverage and details on the installation.",
+				},
+				{
+					type: "article",
+					tag: "Press",
+					title: "FELT FANTASIES IN FLORIDA: LUCY SPARROW LANDS AT FLORIDARAMA - Fused Magazine",
+					source: "Fused Magazine",
+					url: "https://www.fusedmagazine.co.uk/felt-fantasies-in-florida-lucy-sparrow-lands-at-floridarama/",
+					thumb: "https://www.fusedmagazine.co.uk/wp-content/uploads/2025/12/2.png",
+					description: "Feature on Lucy Sparrow landing at FloridaRAMA.",
+				},
+				{
+					type: "article",
+					tag: "Press",
+					title: "FloridaRAMA showcases Lucy Sparrow's homage to convenience stores – 83 Degrees Media",
+					source: "83 Degrees",
+					url: "https://83degreesmedia.com/floridarama-showcases-lucy-sparrows-homage-to-convenience-stores/",
+					thumb: "https://d2t9fahskrqkcw.cloudfront.net/wp-content/uploads/2025/11/01003909/floridaramaquickshop.jpg",
+					description: "Story on the immersive felt convenience store concept.",
+				},
+				{
+					type: "article",
+					tag: "Press",
+					title: "Florida fantasy reigns at Lucy Sparrow’s 13,000-item felt store in St. Pete",
+					source: "Tampa Bay Times",
+					url: "https://www.tampabay.com/life-culture/arts/visual-arts/2025/11/25/lucy-sparrow-quick-shop-st-petersburg-miami-florida-felt-floridarama/",
+					thumb: "https://www.tampabay.com/resizer/v2/BQ3M36XGKJBNVFBMM3WPPHMDYA.JPG?auth=a45d234220ebd5f159a37b77885113b51b630fed46601f83d64cb8d0961085c6&height=675&width=1200&smart=true",
+					description: "Major feature on the project and the experience.",
+				},
+				{
+					type: "article",
+					tag: "Press",
+					title: "\"Lucy Sparrow's Quick Shop\" A Totally Unique Date Idea at FloridaRAMA",
+					source: "Tampa Bay Date Night Guide",
+					url: "https://tampabaydatenightguide.com/lucy-sparrow-at-floridarama/",
+					thumb: "https://tampabaydatenightguide.com/wp-content/uploads/2025/11/Untitled-design-22.jpg",
+					description: "A guide-style article for planning a visit.",
+				},
+				{
+					type: "article",
+					tag: "Press",
+					title: "New pop-up shop, immersive experience features food, products made of felt at FloridaRAMA | wtsp.com",
+					source: "WTSP 10 Tampa Bay",
+					url: "https://www.wtsp.com/article/news/local/pinellascounty/floridarama-felt-grocery-store-pop-up-lucy-sparrow-st-petersburg/67-98781345-159c-45dc-84d9-bfc3fd8ea7b8",
+					thumb: "https://media.wtsp.com/assets/WTSP/images/f9448d98-66bb-45e9-ab5f-da494ab7a8e3/20251125T191228/f9448d98-66bb-45e9-ab5f-da494ab7a8e3_1140x641.jpg",
+					description: "News coverage of the pop-up felt grocery store.",
+				},
+				{
+					type: "video",
+					tag: "Video",
+					title: "FloridaRAMA on WFLA Gems of Tampa Bay with Brianda Villegas",
+					source: "YouTube",
+					url: "https://www.youtube.com/watch?v=5gQ6UwI31us&list=PLI56I3I7Rz9So_IJCoR9ngsBJG98ZsASk&index=28",
+					description: "Video coverage featuring FloridaRAMA.",
+				},
+				{
+					type: "video",
+					tag: "Video",
+					title: "New exhibit at FloridaRAMA | FOX 13 Tampa Bay",
+					source: "FOX 13",
+					url: "https://www.fox13news.com/video/1497384",
+					thumb: "https://images.foxtv.com/static-media.fox.com/fmcv3/prod/fts/A-395551/1200/630/r8ekn0o338cgtf48.jpg?ve=1&tl=1",
+					description: "FOX 13 segment featuring FloridaRAMA.",
+				},
+				{
+					type: "video",
+					tag: "Video",
+					title: "Sneak peek at Fairgrounds St. Pete's new exhibit | FOX 13 Tampa Bay",
+					source: "FOX 13",
+					url: "https://www.fox13news.com/video/1412467",
+					thumb: "https://images.foxtv.com/static-media.fox.com/fmcv3/prod/fts/A-350142/1200/630/p6cgvdtnraornisx.jpg?ve=1&tl=1",
+					description: "Another FOX 13 segment about FloridaRAMA.",
+				},
+				{
+					type: "video",
+					tag: "Video",
+					title: "Unveiled: ABC Action News Sean Daly Experiences \"The Bait Ball\" Artwork at FloridaRAMA",
+					source: "YouTube",
+					url: "https://www.youtube.com/watch?v=nwKtNku_tiM&list=PLI56I3I7Rz9So_IJCoR9ngsBJG98ZsASk&index=34",
+					description: "Video coverage featuring FloridaRAMA.",
+				},
+				{
+					type: "article",
+					group: "nation",
+					tag: "Feature",
+					title: "Things to Do in St. Petersburg Florida on Your Next Road Trip - Thrillist",
+					source: "Thrillist",
+					url: "https://www.thrillist.com/travel/miami/things-to-do-in-st-petersburg-florida",
+					thumb: "https://assets3.thrillist.com/v1/image/3165658/1200x600/scale;;webp=auto;jpeg_quality=85.jpg",
+					description: "National travel feature mentioning St. Petersburg.",
+				},
+				{
+					type: "article",
+					group: "nation",
+					tag: "Feature",
+					title: "Florida: Clearwater & St. Petersburg review - The Scottish Sun",
+					source: "The Scottish Sun",
+					url: "https://www.thescottishsun.co.uk/travel/8303490/florida-clearwater-st-petersburg-review/",
+					description: "Travel coverage featuring the area.",
+				},
+				{
+					type: "article",
+					group: "nation",
+					tag: "Feature",
+					title: "5 New Museums in Florida​",
+					source: "AARP",
+					url: "https://www.aarp.org/travel/vacation-ideas/history-culture/new-museums-in-florida/",
+					thumb: "https://cdn.aarp.net/content/dam/aarp/AARP.jpeg",
+					description: "National roundup including Florida museums.",
+				},
+				{
+					type: "article",
+					group: "nation",
+					tag: "Feature",
+					title: "Millennials can’t get enough of Tampa and St. Pete - AFAR",
+					source: "AFAR",
+					url: "https://www.afar.com/magazine/millennials-cant-get-enough-of-tampa-and-st-pete-florida",
+					description: "National travel feature about Tampa and St. Pete.",
+				},
+				{
+					type: "article",
+					group: "nation",
+					tag: "Feature",
+					title: "Fairgrounds St. Pete Expands with Exhibit, Gives \"The Bait Ball\" Permanent Home - Art Business News",
+					source: "Art Business News",
+					url: "https://artbusinessnews.com/2024/02/fairgrounds-st-pete-expands-with-exhibit-gives-the-bait-ball-permanent-home/",
+					thumb: "https://artbusinessnews.com/wp-content/uploads/2024/02/featured-image-1024x602.png",
+					description: "Industry coverage of Fairgrounds St. Pete / FloridaRAMA.",
+				},
+				{
+					type: "article",
+					group: "nation",
+					tag: "Feature",
+					title: "Fairgrounds St. Pete expands and rebrands as FloridaRAMA | blooloop",
+					source: "blooloop",
+					url: "https://blooloop.com/immersive/news/fairgrounds-st-pete-floridarama/",
+					thumb: "https://blooloop.com/media-library/floridarama.jpg?id=56474900&width=1200&height=600&coordinates=0%2C256%2C0%2C256",
+					description: "Immersive industry news coverage.",
+				},
+				{
+					type: "article",
+					group: "nation",
+					tag: "Feature",
+					title: "Fairgrounds St. Pete: behind the immersive art experience | blooloop",
+					source: "blooloop",
+					url: "https://blooloop.com/museum/in-depth/fairgrounds-st-pete/",
+					thumb: "https://blooloop.com/media-library/lampscape-at-fairgrounds-st-pete.jpg?id=56469956&width=1200&height=600&coordinates=30%2C0%2C31%2C0",
+					description: "In-depth coverage of Fairgrounds St. Pete.",
+				},
+				{
+					type: "video",
+					group: "nation",
+					tag: "Video",
+					title: "MAKE SURE YOU DO IT THE RIGHT WAY | With Expert Liz Dimmitt | The Business Spotlight",
+					source: "YouTube",
+					url: "https://www.youtube.com/watch?v=7JO-tY212pM",
+					description: "National feature video.",
+				},
+				{
+					type: "article",
+					group: "nation",
+					tag: "Feature",
+					title: "Mikhail Mansion—From Military Into Interactive Art | DailyArt Magazine",
+					source: "DailyArt Magazine",
+					url: "https://www.dailyartmagazine.com/mikhail-mansion/",
+					thumb: "https://www.dailyartmagazine.com/wp-content/uploads/2023/12/Mikhail-Mansion-Co-Founder-and-Chief-Design-Officer_Copyright-Fairgrounds-St-Pete-2021_FORWEB.jpg",
+					description: "Feature coverage.",
+				},
+				{
+					type: "article",
+					group: "nation",
+					tag: "Feature",
+					title: "Culture Continues Fueling Ascension Of St. Petersburg, Florida",
+					source: "Forbes",
+					url: "https://www.forbes.com/sites/chaddscott/2021/06/09/culture-continues-fueling-ascension-of-st-petersburg-florida/?sh=7f92721c20f1",
+					thumb: "https://imageio.forbes.com/specials-images/imageserve/60c0a489028232b6b29b0781/0x0.jpg?format=jpg&crop=1791,1009,x0,y238,safe&height=900&width=1600&fit=bounds",
+					description: "National coverage of St. Petersburg culture.",
+				},
+				{
+					type: "article",
+					group: "nation",
+					tag: "Feature",
+					title: "Best museums for first dates in St. Petersburg - Healthy Framework",
+					source: "Healthy Framework",
+					url: "https://healthyframework.com/best-museums-first-dates-st-petersburg/",
+					description: "Roundup-style feature mentioning local museums.",
+				},
+				{
+					type: "article",
+					group: "nation",
+					tag: "Feature",
+					title: "10 Roadside Attractions in Florida You Can't Miss - Livability.com",
+					source: "Livability",
+					url: "https://livability.com/topics/experiences-adventures/10-roadside-attractions-in-florida-you-cant-miss/",
+					thumb: "https://livability.com/wp-content/uploads/2022/05/FLRoadStockPhoto.jpg",
+					description: "National roundup of Florida attractions.",
+				},
+			];
+
+			const BRAND_STRIP_COLORS = [
+				"var(--brand-pink)",
+				"var(--brand-blue)",
+				"var(--brand-green)",
+				"var(--brand-yellow)",
+				"var(--brand-orange)",
+			];
+
+			// Card fills should NOT use yellow.
+			const BRAND_CARD_COLORS = [
+				"var(--brand-pink)",
+				"var(--brand-blue)",
+				"var(--brand-green)",
+				"var(--brand-orange)",
+			];
+
+			// Local links grouped by source (with scraped or derived titles)
+			const LOCAL_LINKS = {
+				"10 Tampa Bay": [
+					{ url: "https://www.wtsp.com/video/features/great-day-live/check-out-mystical-mermaid-march-at-fairgrounds-st-pete/67-6d481621-f75b-4e89-9297-f7333753ca2a", title: "Check out Mystical Mermaid March at Fairgrounds St. Pete" },
+					{ url: "https://www.wtsp.com/video/features/great-day-live/new-art-installation-at-fairgrounds/67-f2e055af-5b77-4d0f-8a38-5d4dcd312477", title: "New art installation at Fairgrounds" },
+					{ url: "https://www.wtsp.com/video/features/great-day-live/explore-fairgrounds-st-pete/67-d8b7c8e3-8d93-4b2e-a72f-e88a99f50406", title: "Explore Fairgrounds St. Pete" },
+				],
+				"83 Degrees": [
+					{ url: "https://83degreesmedia.com/South-Saint-Pete-arts-group-calls-for-art-submissions-042020/", title: "Call for Florida artists, makers, creatives from Fairgrounds in South St. Pete" },
+					{ url: "https://83degreesmedia.com/arts-fairgrounds-takes-shape-in-StPete-021120/", title: "Fairgrounds: Immersive arts destination could transform South St. Pete" },
+				],
+				"Axios Tampa Bay": [
+					{ url: "https://www.axios.com/local/tampa-bay/2024/05/06/st-pete-fairgrounds-tpa-art-iboms-ducky?utm_term=emshare", title: "Rubber duckies hide among art exhibits at St. Pete Fairgrounds, TPA" },
+					{ url: "https://www.axios.com/local/tampa-bay/2024/01/25/bait-ball-exhibit-st-pete-fairgrounds", title: "Immersive \"Bait Ball\" exhibit rolls into St. Pete Fairgrounds" },
+				],
+				"Business Observer": [
+					{ url: "https://www.businessobserverfl.com/news/2024/may/09/entrepreneur-liz-dimmitt/", title: "Entrepreneur Liz Dimmitt" },
+					{ url: "https://www.podbean.com/media/share/pb-iwucg-14c7420?utm_campaign=w_share_ep&utm_medium=dlink&utm_source=w_share", title: "Motors, Murals and Museums: The Interesting Life of Liz Dimmitt (podcast)" },
+				],
+				"ABC Action News": [
+					{ url: "https://www.tampabay28.com/news/region-pinellas/pdap-hosts-amendment-3-panel-discussion-at-floridarama", title: "PDAP Hosts Amendment 3 Panel Discussion at FloridaRAMA" },
+					{ url: "https://www.tampabay28.com/morning-blend/free-makeovers-on-site-mammograms-more-floridarama-hosting-glam-for-the-girls-event", title: "Free makeovers on-site, mammograms & more — FloridaRAMA hosts Glam for the Girls" },
+					{ url: "https://www.tampabay28.com/morning-blend/immerse-yourself-in-weird-wacky-wonderful-art-at-floridarama-in-st-pete", title: "Immerse yourself in weird, wacky, wonderful art at FloridaRAMA" },
+					{ url: "https://www.tampabay28.com/morning-blend/st-pete-folklore-comes-to-life-check-out-weird-in-st-pete-at-floridarama-now-nov-3", title: "St. Pete folklore comes to life — Weird in St. Pete at FloridaRAMA" },
+					{ url: "https://www.tampabay28.com/news/local-news/floridarama-brings-unique-twist-to-celebrating-christmas-in-sunshine-state", title: "FloridaRAMA brings unique twist to celebrating Christmas in Sunshine State" },
+					{ url: "https://www.tampabay28.com/news/region-pinellas/tampa-artist-devon-brady-unveils-the-bait-ball-at-fairgrounds-st-pete", title: "Tampa artist Devon Brady unveils the Bait Ball at Fairgrounds St. Pete" },
+					{ url: "https://www.abcactionnews.com/news/region-pinellas/fairgrounds-st-pete-an-immersive-art-museum-featuring-local-artists-opens-thursday", title: "Fairgrounds St. Pete — immersive art museum opens Thursday" },
+					{ url: "https://www.tampabay28.com/lifestyle/things-to-do/things-to-do-in-tampa-bay-this-weekend-january-24-26", title: "Things to do in Tampa Bay this weekend — Jan 24–26" },
+					{ url: "https://www.tampabay28.com/lifestyle/things-to-do/things-to-do-in-tampa-bay-this-weekend-january-3-5", title: "Things to do in Tampa Bay this weekend — Jan 3–5" },
+					{ url: "https://www.tampabay28.com/news/region-pinellas/local-artist-iboms-gets-two-spectacular-exhibits-at-tpa-and-fairgrounds-st-pete", title: "Local artist iBOMS gets two spectacular exhibits at TPA and Fairgrounds St. Pete" },
+					{ url: "https://www.tampabay28.com/morning-blend/fairgrounds-st-pete-hosting-mermaid-themed-events-all-throughout-march", title: "Fairgrounds St. Pete hosting mermaid-themed events all through March" },
+					{ url: "https://www.tampabay28.com/news/region-hillsborough/hillsborough-county-fire-captain-puts-out-fires-and-puts-up-art-work", title: "Hillsborough County fire captain puts out fires and puts up artwork" },
+					{ url: "https://www.tampabay28.com/morning-blend/the-bait-ball-exhibit-set-to-be-unveiled-at-fairgrounds-st-pete-on-jan-25", title: "The Bait Ball exhibit set to be unveiled at Fairgrounds St. Pete on Jan 25" },
+					{ url: "https://www.tampabay28.com/news/region-pinellas/fairgrounds-st-pete-features-new-event-with-smells-of-the-holidays", title: "Fairgrounds St. Pete features new event with smells of the holidays" },
+				],
+			};
+
+			function stableHash(input) {
+				const s = String(input || "");
+				let hash = 0;
+				for (let i = 0; i < s.length; i++) {
+					hash = (hash * 31 + s.charCodeAt(i)) >>> 0;
+				}
+				return hash;
+			}
+
+			function pickStripColor(item) {
+				const key = item.url || item.title || "";
+				const idx = stableHash(key) % BRAND_STRIP_COLORS.length;
+				return BRAND_STRIP_COLORS[idx];
+			}
+
+			function pickCardFillByIndex(renderIndex) {
+				const idx = Math.abs(Number(renderIndex) || 0) % BRAND_CARD_COLORS.length;
+				return BRAND_CARD_COLORS[idx];
+			}
+
+			function getHostname(url) {
+				try {
+					return new URL(url).hostname.replace(/^www\./, "");
+				} catch {
+					return "";
+				}
+			}
+
+			function extractYouTubeId(url) {
+				try {
+					const u = new URL(url);
+					if (u.hostname.includes("youtu.be")) {
+						return u.pathname.replace("/", "");
+					}
+					if (u.hostname.includes("youtube.com")) {
+						return u.searchParams.get("v");
+					}
+				} catch {
+					// ignore
+				}
+				return null;
+			}
+
+			function getYouTubeThumb(id) {
+				// hqdefault is usually crisp and safe for cards
+				return `https://img.youtube.com/vi/${id}/hqdefault.jpg`;
+			}
+
+			function escapeHtml(str) {
+				return String(str)
+					.replaceAll("&", "&amp;")
+					.replaceAll("<", "&lt;")
+					.replaceAll(">", "&gt;")
+					.replaceAll('"', "&quot;")
+					.replaceAll("'", "&#39;");
+			}
+
+			function cardThumb(item) {
+				if (item && typeof item.thumb === "string" && item.thumb.trim()) {
+					return item.thumb.trim();
+				}
+				if (item.type === "video") {
+					const id = extractYouTubeId(item.url);
+					if (id) return getYouTubeThumb(id);
+				}
+				// No placeholder image: return null and render a clean, image-less card.
+				return null;
+			}
+
+			function matchesFilter(item, filter) {
+				if (filter === "all") return true;
+				if (filter === "video" || filter === "article") return item.type === filter;
+				if (filter === "nation") return item && item.group === "nation";
+				return true;
+			}
+
+			function renderGrid(filter) {
+				const grid = document.getElementById("grid");
+				const items = ITEMS.filter((i) => matchesFilter(i, filter));
+
+				// Local tab: grouped text-only links by source
+				if (filter === "local") {
+					const groups = Object.entries(LOCAL_LINKS);
+					grid.innerHTML = `
+						<div class="localGroups" role="list">
+							${groups
+								.map(([source, items], gIdx) => {
+									const fill = pickCardFillByIndex(gIdx);
+									return `
+										<div class="groupCard" role="listitem" style="--card-fill: ${fill};">
+											<h4 class="groupTitle">${escapeHtml(source)}</h4>
+											<div class="groupLinks">
+												${items
+													.map((it) => {
+														const title = escapeHtml(it.title || it.url);
+														const url = escapeHtml(it.url);
+														return `<a href="${url}" target="_blank" rel="noopener noreferrer">${title}</a>`;
+														})
+													.join("")}
+											</div>
+										</div>
+									`;
+								})
+								.join("")}
+						</div>
+					`;
+					return;
+				}
+
+				// Nation tab: text-only links (no thumbnails/cards)
+				if (filter === "nation") {
+					grid.innerHTML = `
+						<div class="simpleList" role="list">
+							${items
+								.map((item, idx) => {
+									const hostname = getHostname(item.url);
+									const title = escapeHtml(item.title || hostname);
+									const source = escapeHtml(item.source || hostname);
+									const kind = item.type === "video" ? "Video" : "Feature";
+									const dataUrl = escapeHtml(item.url);
+										const cardFill = pickCardFillByIndex(idx);
+										return `
+														<a class="simpleItem" role="listitem" href="${dataUrl}" target="_blank" rel="noopener noreferrer" style="--card-fill: ${cardFill};">
+											<span class="simpleTitle">${title}</span>
+											<span class="simpleMeta">${escapeHtml(kind)} · ${source}</span>
+										</a>
+									`;
+								})
+								.join("")}
+						</div>
+					`;
+					return;
+				}
+
+				grid.innerHTML = items
+					.map((item, idx) => {
+						const thumb = cardThumb(item);
+						const isVideo = item.type === "video";
+						const stripColor = item.type === "article" ? pickStripColor(item) : null;
+						const cardFill = pickCardFillByIndex(idx);
+						const hostname = getHostname(item.url);
+						const title = escapeHtml(item.title || hostname);
+						const desc = escapeHtml(item.description || "");
+						const source = escapeHtml(item.source || hostname);
+						const tag = escapeHtml(item.tag || (isVideo ? "Video" : "Article"));
+						const dataUrl = escapeHtml(item.url);
+						const actionLabel = isVideo ? "Play" : "Read";
+
+						const styleVars = [
+							stripColor ? `--strip-color: ${stripColor};` : "",
+							cardFill ? `--card-fill: ${cardFill};` : "",
+						]
+							.filter(Boolean)
+							.join(" ");
+
+						return `
+							<article class="card" data-type="${item.type}" data-idx="${idx}" ${styleVars ? `style="${styleVars}"` : ""}>
+								<a class="thumb ${thumb ? "" : "no-img"}" href="${dataUrl}" ${isVideo ? "data-action=play" : "target=_blank rel=noopener noreferrer"} aria-label="${isVideo ? "Play" : "Open"} ${title}">
+									${thumb ? `<img alt="" src="${thumb}" loading="lazy" />` : ``}
+									${
+										isVideo
+											? `<div class="play" aria-hidden="true"><div class="play-badge"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div></div>`
+											: ``
+									}
+								</a>
+								<div class="body">
+									<div class="meta">
+										<span class="tag">${tag}</span>
+										<span class="source" title="${source}">${source}</span>
+									</div>
+									<h3 class="headline">${title}</h3>
+									${desc ? `<p class="desc">${desc}</p>` : ``}
+									<div class="actions">
+										${
+											isVideo
+												? `<button class="btn primary" type="button" data-action="play" data-url="${dataUrl}" data-title="${title}">${actionLabel}</button>`
+												: `<a class="btn primary" href="${dataUrl}" target="_blank" rel="noopener noreferrer">${actionLabel}</a>`
+										}
+										<span class="tiny">${escapeHtml(hostname)}</span>
+									</div>
+								</div>
+							</article>
+						`;
+					})
+					.join("");
+
+				// Hook up scroll pop-in
+				const observer = new IntersectionObserver(
+					(entries) => {
+						for (const e of entries) {
+							if (e.isIntersecting) {
+								e.target.classList.add("in-view");
+								observer.unobserve(e.target);
+							}
+						}
+					},
+					{ threshold: 0.14, rootMargin: "0px 0px -10% 0px" }
+				);
+				grid.querySelectorAll(".card").forEach((el) => observer.observe(el));
+			}
+
+			function buildVideoEmbed(url) {
+				const ytId = extractYouTubeId(url);
+				if (ytId) {
+					const embed = `https://www.youtube-nocookie.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`;
+					return `<iframe src="${embed}" allow="autoplay; encrypted-media; picture-in-picture" allowfullscreen></iframe>`;
+				}
+
+				// FOX 13 and other hosts: safest fallback is to open in a new tab.
+				// Some sites block embedding (X-Frame-Options / CSP).
+				return null;
+			}
+
+			function openModal({ url, title }) {
+				const modal = document.getElementById("modal");
+				const player = document.getElementById("player");
+				const modalTitle = document.getElementById("modalTitle");
+
+				const embedHtml = buildVideoEmbed(url);
+				if (!embedHtml) {
+					window.open(url, "_blank", "noopener,noreferrer");
+					return;
+				}
+
+				modalTitle.textContent = title || "Video";
+				player.innerHTML = embedHtml;
+				modal.classList.add("open");
+				modal.setAttribute("aria-hidden", "false");
+			}
+
+			function closeModal() {
+				const modal = document.getElementById("modal");
+				const player = document.getElementById("player");
+				modal.classList.remove("open");
+				modal.setAttribute("aria-hidden", "true");
+				player.innerHTML = "";
+			}
+
+			// Filters
+			document.querySelectorAll(".chip").forEach((btn) => {
+				btn.addEventListener("click", () => {
+					const filter = btn.getAttribute("data-filter");
+					document.querySelectorAll(".chip").forEach((b) => b.setAttribute("aria-pressed", "false"));
+					btn.setAttribute("aria-pressed", "true");
+					renderGrid(filter);
+				});
+			});
+
+			// Delegated click handlers for play
+			document.addEventListener("click", (e) => {
+				const playBtn = e.target.closest("[data-action='play']");
+				if (playBtn) {
+					e.preventDefault();
+					const url = playBtn.getAttribute("data-url") || playBtn.getAttribute("href");
+					const title = playBtn.getAttribute("data-title") || "Video";
+					openModal({ url, title });
+				}
+			});
+
+			// Modal close
+			document.getElementById("modalClose").addEventListener("click", closeModal);
+			document.getElementById("modal").addEventListener("click", (e) => {
+				if (e.target && e.target.id === "modal") closeModal();
+			});
+			document.addEventListener("keydown", (e) => {
+				if (e.key === "Escape") closeModal();
+			});
+
+			// Initial render
+			renderGrid("all");
+		</script>
+	</body>
+</html>

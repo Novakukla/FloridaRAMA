@@ -11,15 +11,31 @@
       --overlay-opacity: 0;
     }
 
-    html, body { margin:0; padding:0; background:transparent; }
+    html, body { margin:0; padding:0; background:transparent; height:100%; overflow:hidden; }
     body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
 
-    .wrap{
+    .scroller{
+      height: var(--embed-h, 100vh);
+      overflow-y: auto;
+      overscroll-behavior: contain;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none; /* Firefox */
+    }
+    .scroller::-webkit-scrollbar{ width:0; height:0; }
+
+    .after{
       width: 100%;
       box-sizing: border-box;
       padding: var(--gap);
       display: grid;
       gap: var(--gap);
+    }
+
+    .scene{
+      position: relative;
+      height: 220vh; /* scroll room for 3 waves */
+      padding: var(--gap);
+      box-sizing: border-box;
     }
 
     .panel{
@@ -29,20 +45,47 @@
       border-radius: var(--radius);
       overflow: hidden;
       box-shadow: var(--shadow);
-      --reveal-y: 18px;
+      --reveal-y: 0px;
       --float-y: 0px;
       --hover-y: 0px;
       transform: translate3d(0, calc(var(--reveal-y) + var(--float-y) + var(--hover-y)), 0);
-      opacity: 0;
+      opacity: 1;
       transition: transform 700ms ease, opacity 700ms ease;
       will-change: transform, opacity;
       background: transparent;
+    }
+
+    /* Optional reveal-once (for non-hero panels) */
+    .panel[data-reveal="on"]{
+      --reveal-y: 18px;
+      opacity: 0;
+    }
+
+    /* Fullscreen hero panel (sticky inside scene) */
+    .panel.hero{
+      position: sticky;
+      top: var(--gap);
+      /* Keep the hero landscape even if Wix constrains width */
+      height: min(
+        calc(var(--embed-h, 100vh) - (var(--gap) * 2)),
+        calc(100vw * 9 / 16)
+      );
+      aspect-ratio: auto;
     }
 
     .panel.revealed{
       --reveal-y: 0px;
       opacity: 1;
     }
+
+    /* Wave gates: accents appear as you keep scrolling */
+    .panel.wave0 .accent{ opacity: 0; }
+    .panel.wave1 .accent[data-wave="1"],
+    .panel.wave2 .accent[data-wave="1"],
+    .panel.wave3 .accent[data-wave="1"]{ opacity: 1; }
+    .panel.wave2 .accent[data-wave="2"],
+    .panel.wave3 .accent[data-wave="2"]{ opacity: 1; }
+    .panel.wave3 .accent[data-wave="3"]{ opacity: 1; }
 
     /* The parallax layer (image) */
     .layer{
@@ -63,6 +106,14 @@
       background: transparent;
     }
 
+    /* Optional: allow true background-style banners */
+    .panel[data-fit="cover"] .layer{
+      inset: -10% 0; /* extra vertical room for background parallax */
+    }
+    .panel[data-fit="cover"] .layer img{
+      object-fit: cover;
+    }
+
     /* subtle readability overlay (optional) */
     .overlay{
       position:absolute;
@@ -76,6 +127,47 @@
       opacity: var(--overlay-opacity);
       pointer-events:none;
     }
+
+    /* Accent layers (foreground elements that can reveal + parallax) */
+    .accents{
+      position: absolute;
+      inset: 0;
+      pointer-events: none;
+      z-index: 2;
+    }
+
+    .accent{
+      position: absolute;
+      display: block;
+      width: var(--w, clamp(160px, 24vw, 460px));
+      height: auto;
+      opacity: 0;
+      --enter-y: 10px;
+      --p: 0px;
+      transform: translate3d(0, calc(var(--enter-y) + var(--p)), 0);
+      transition: transform 650ms ease, opacity 650ms ease;
+      transition-delay: var(--delay, 0ms);
+      will-change: transform, opacity;
+      user-select: none;
+    }
+
+    .panel.wave1 .accent[data-wave="1"],
+    .panel.wave2 .accent[data-wave="1"],
+    .panel.wave3 .accent[data-wave="1"],
+    .panel.wave2 .accent[data-wave="2"],
+    .panel.wave3 .accent[data-wave="2"],
+    .panel.wave3 .accent[data-wave="3"]{
+      --enter-y: 0px;
+    }
+
+    /* Simple placement helpers (tweak per banner) */
+    .pos-tl{ top: clamp(10px, 2vw, 22px); left: clamp(10px, 2vw, 22px); }
+    .pos-tr{ top: clamp(10px, 2vw, 22px); right: clamp(10px, 2vw, 22px); }
+    .pos-tm{ top: clamp(10px, 2vw, 22px); left: 50%; transform: translate3d(-50%, calc(var(--enter-y) + var(--p)), 0); }
+    .pos-bm{ bottom: clamp(10px, 2vw, 22px); left: 50%; transform: translate3d(-50%, calc(var(--enter-y) + var(--p)), 0); }
+    .pos-bl{ bottom: clamp(10px, 2vw, 22px); left: clamp(10px, 2vw, 22px); }
+    .pos-br{ bottom: clamp(10px, 2vw, 22px); right: clamp(10px, 2vw, 22px); }
+
 
     /* last row split into 2 */
     .split{
@@ -94,62 +186,120 @@
     }
 
     @media (max-width: 820px){
-      .wrap{ padding: 12px; gap: 12px; }
+      :root{ --gap: 12px; }
+      .after{ padding: 12px; gap: 12px; }
       .split{ grid-template-columns: 1fr; }
     }
 
     @media (prefers-reduced-motion: reduce){
       .panel{ transition: none; transform:none; opacity:1; }
       .layer{ inset:0; }
+      .scroller{ scroll-behavior: auto; }
     }
   </style>
 </head>
 
 <body>
-  <div class="wrap" id="wrap">
-
-    <!-- Lucy -->
-    <section class="panel linklike" style="--aspect: 16 / 9;" data-parallax="off" data-speed="0.22" data-href="/lucy-sparrow" aria-label="Lucy Sparrow">
-      <div class="layer">
-        <img alt="Lucy Sparrow banner"
-          src="https://static.wixstatic.com/media/400eb0_26800487d5cd4a0c9638f4d4f409cb26~mv2.png">
-      </div>
-      <div class="overlay"></div>
-    </section>
-
-    <!-- HoliDAZE -->
-    <section class="panel linklike" style="--aspect: 16 / 9;" data-parallax="off" data-speed="0.18" data-href="/holidaze" aria-label="HoliDAZE">
-      <div class="layer">
-        <img alt="HoliDAZE banner"
-          src="https://static.wixstatic.com/media/400eb0_c58852815f8549ffaa247fb6da12a752~mv2.png">
-      </div>
-      <div class="overlay"></div>
-    </section>
-
-    <!-- Split row: Membership + Gift Box -->
-    <div class="split">
-      <section class="panel linklike" style="--aspect: 16 / 9;" data-parallax="off" data-speed="0.20" data-href="/membership" aria-label="Membership">
+  <div class="scroller" id="scroller">
+    <!-- Scene 1: Lucy (fullscreen + waves) -->
+    <div class="scene" data-scene>
+      <section class="panel hero linklike wave0" data-fit="cover" data-parallax="on" data-parallax-start="0.25" data-bg-amp="36" data-speed="0.22" data-href="/lucy-sparrow" aria-label="Lucy Sparrow">
         <div class="layer">
-          <img alt="Membership banner"
-            src="https://static.wixstatic.com/media/400eb0_41b4f29a318543a4af2f1101d781e96b~mv2.png">
+          <img alt="Lucy Sparrow background"
+            src="https://static.wixstatic.com/media/400eb0_825f55c593d3439e841e8883b43875a8~mv2.png">
         </div>
-        <div class="overlay"></div>
-      </section>
 
-      <section class="panel linklike" style="--aspect: 16 / 9;" data-parallax="off" data-speed="0.16" data-href="/gift-box" aria-label="Gift Box">
-        <div class="layer">
-          <img alt="Gift box banner"
-            src="https://static.wixstatic.com/media/400eb0_a903ed97156c48cd9d4cd608c4f1c924~mv2.png">
+        <div class="accents" aria-hidden="true">
+          <!-- Wave 1 -->
+          <img class="accent pos-tr" data-wave="1" style="--delay: 0ms; --w: clamp(170px, 26vw, 520px);" data-speed="0.55"
+            alt="" src="https://static.wixstatic.com/media/400eb0_54de5a9ecec941ac820e10400d3b2345~mv2.png">
+          <img class="accent pos-tl" data-wave="1" style="--delay: 0ms; --w: clamp(170px, 26vw, 520px);" data-speed="0.52"
+            alt="" src="https://static.wixstatic.com/media/400eb0_ee6cd8a48e584553b7aac51cc8d63ec4~mv2.png">
+          <img class="accent pos-tm" data-wave="1" style="--delay: 0ms; --w: clamp(200px, 30vw, 640px);" data-speed="0.60"
+            alt="" src="https://static.wixstatic.com/media/400eb0_89a311f88b79475393701a16b8117373~mv2.png">
+
+          <!-- Wave 2 -->
+          <img class="accent pos-bm" data-wave="2" style="--delay: 0ms; --w: clamp(360px, 56vw, 1400px);" data-speed="0.40"
+            alt="" src="https://static.wixstatic.com/media/400eb0_811d4dc357b94942879d905582613a5f~mv2.png">
+
+          <!-- Wave 3 -->
+          <img class="accent pos-br" data-wave="3" style="--delay: 0ms; --w: clamp(160px, 24vw, 420px);" data-speed="0.45"
+            alt="" src="https://static.wixstatic.com/media/400eb0_3eeefb1abb634af7b3c1f1e3e4659033~mv2.png">
         </div>
+
         <div class="overlay"></div>
       </section>
     </div>
 
+    <!-- Scene 2: HoliDAZE (fullscreen + waves) -->
+    <div class="scene" data-scene>
+      <section class="panel hero linklike wave0" data-fit="cover" data-parallax="on" data-parallax-start="0.25" data-bg-amp="32" data-speed="0.18" data-href="/holidaze" aria-label="HoliDAZE">
+        <div class="layer">
+          <img alt="HoliDAZE background"
+            src="https://static.wixstatic.com/media/400eb0_257a1b90406a40ec85b52bef8bb909d6~mv2.png">
+        </div>
+
+        <div class="accents" aria-hidden="true">
+          <!-- Wave 1 -->
+          <img class="accent pos-bm" data-wave="1" style="--delay: 0ms; --w: clamp(320px, 48vw, 1100px);" data-speed="0.42"
+            alt="" src="https://static.wixstatic.com/media/400eb0_0d0e61c28f73423085f6b95dad53155e~mv2.png">
+
+          <!-- Wave 2 -->
+          <img class="accent pos-tl" data-wave="2" style="--delay: 0ms; --w: clamp(170px, 26vw, 520px);" data-speed="0.55"
+            alt="" src="https://static.wixstatic.com/media/400eb0_798b99bd89114a1d8fd4ca7ea1e4d91b~mv2.png">
+
+          <!-- Wave 3 -->
+          <img class="accent pos-bl" data-wave="3" style="--delay: 0ms; --w: clamp(170px, 26vw, 560px);" data-speed="0.50"
+            alt="" src="https://static.wixstatic.com/media/400eb0_a1da6682544c49db922cfaec65d764c0~mv2.png">
+        </div>
+
+        <div class="overlay"></div>
+      </section>
+    </div>
+
+    <!-- After: Split row -->
+    <div class="after" id="after">
+      <div class="split">
+        <section class="panel linklike" style="--aspect: 16 / 9;" data-reveal="on" data-parallax="off" data-speed="0.20" data-href="/membership" aria-label="Membership">
+          <div class="layer">
+            <img alt="Membership banner"
+              src="https://static.wixstatic.com/media/400eb0_41b4f29a318543a4af2f1101d781e96b~mv2.png">
+          </div>
+          <div class="overlay"></div>
+        </section>
+
+        <section class="panel linklike" style="--aspect: 16 / 9;" data-reveal="on" data-parallax="off" data-speed="0.16" data-href="/gift-box" aria-label="Gift Box">
+          <div class="layer">
+            <img alt="Gift box banner"
+              src="https://static.wixstatic.com/media/400eb0_a903ed97156c48cd9d4cd608c4f1c924~mv2.png">
+          </div>
+          <div class="overlay"></div>
+        </section>
+      </div>
+    </div>
   </div>
 
   <script>
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    const scroller = document.getElementById("scroller");
     const panels = Array.from(document.querySelectorAll(".panel"));
+    const scenes = Array.from(document.querySelectorAll("[data-scene]"));
+
+    // Reveal-once for non-hero panels inside the internal scroller
+    const revealPanels = panels.filter((p) => p.getAttribute("data-reveal") === "on");
+    const revealedOnce = new WeakSet();
+    const io = ("IntersectionObserver" in window) && scroller
+      ? new IntersectionObserver((entries) => {
+          for (const entry of entries) {
+            if (!entry.isIntersecting) continue;
+            entry.target.classList.add("revealed");
+            revealedOnce.add(entry.target);
+            io.unobserve(entry.target);
+          }
+        }, { root: scroller, threshold: 0.12 })
+      : null;
+
+    if (io) revealPanels.forEach((p) => io.observe(p));
 
     // Click-through (keeps Wix routing simple)
     function navigateTop(href) {
@@ -172,49 +322,59 @@
       });
     });
 
-    // Reveal: use IntersectionObserver when it makes sense, but also support
-    // parent-page scrolling (Wix) by computing visibility using frame position.
-    const revealed = new WeakSet();
-    const io = ("IntersectionObserver" in window)
-      ? new IntersectionObserver((entries) => {
-          entries.forEach((entry) => {
-            if (entry.isIntersecting) {
-              entry.target.classList.add("revealed");
-              revealed.add(entry.target);
-              io.unobserve(entry.target);
-            }
-          });
-        }, { threshold: 0.12 })
-      : null;
-
-    if (io) panels.forEach((p) => io.observe(p));
-
-    // Cache panel geometry so we don't read layout per-panel on every frame.
-    let panelMetrics = [];
-    function getScrollY() {
-      return window.scrollY || document.documentElement.scrollTop || 0;
-    }
-
+    // Cache scene geometry in scroller space so we can drive waves + parallax.
+    let sceneMetrics = [];
     function recalcMetrics() {
-      const scrollY = getScrollY();
-      panelMetrics = panels.map((panel) => {
-        const img = panel.querySelector(".layer img");
-        const speed = parseFloat(panel.getAttribute("data-speed") || "0.18");
-        const rect = panel.getBoundingClientRect();
-        const height = rect.height;
-        const topDoc = rect.top + scrollY;
-        const midDoc = topDoc + height / 2;
-        return { panel, img, speed, midDoc, height };
+      const viewportH = scroller ? scroller.clientHeight : window.innerHeight;
+      sceneMetrics = scenes.map((scene) => {
+        const panel = scene.querySelector(".panel");
+        const img = panel ? panel.querySelector(".layer img") : null;
+        const bgSpeed = panel ? parseFloat(panel.getAttribute("data-speed") || "0.18") : 0.18;
+        const parallaxMode = panel ? (panel.getAttribute("data-parallax") || "on").toLowerCase() : "on";
+        const accents = panel
+          ? Array.from(panel.querySelectorAll(".accent")).map((el) => ({
+              el,
+              speed: parseFloat(el.getAttribute("data-speed") || "0.45"),
+              wave: parseInt(el.getAttribute("data-wave") || "1", 10),
+            }))
+          : [];
+
+        const top = scene.offsetTop;
+        const height = scene.offsetHeight;
+        const scrollSpan = Math.max(1, height - viewportH);
+        return { scene, panel, img, bgSpeed, parallaxMode, accents, top, height, scrollSpan };
       });
     }
     recalcMetrics();
 
-    // Auto-height: send only when changed, throttled.
+    // Wix iframe sizing: in scrollytelling mode we want a fullscreen embed.
     let lastSentHeight = -1;
     let heightRaf = 0;
+    function getDesiredEmbedHeight() {
+      // In Wix, the iframe element can be taller than the actual browser viewport.
+      // If we can read the top window height, use it so "fullscreen" is truly fullscreen.
+      try {
+        const h = window.top.innerHeight;
+        if (typeof h === "number" && h > 0) return h;
+      } catch {
+        // ignore cross-origin
+      }
+
+      // Cross-origin fallback: cap to the physical screen height so we don't
+      // accidentally treat an oversized iframe as the viewport.
+      const inner = window.innerHeight || 700;
+      const cap = window.screen?.availHeight || window.screen?.height || inner;
+      return Math.max(320, Math.min(inner, cap));
+    }
+
+    function applyEmbedHeight(h) {
+      document.documentElement.style.setProperty("--embed-h", `${h}px`);
+    }
+
     function sendHeight() {
       heightRaf = 0;
-      const height = document.documentElement.scrollHeight;
+      const height = getDesiredEmbedHeight();
+      applyEmbedHeight(height);
       if (height === lastSentHeight) return;
       lastSentHeight = height;
       window.parent.postMessage({ type: "WIX_EMBED_HEIGHT", height }, "*");
@@ -224,7 +384,7 @@
       heightRaf = requestAnimationFrame(sendHeight);
     }
 
-    // Watch for content-size changes (images, responsive reflow, etc.)
+    // Watch for layout changes (responsive reflow, etc.)
     const ro = ("ResizeObserver" in window)
       ? new ResizeObserver(() => {
           recalcMetrics();
@@ -238,83 +398,70 @@
       requestHeightSend();
     }, { passive: true });
 
-    // Synced parallax: base movement on the element's position in the *parent* viewport.
-    // Key trick: the iframe itself moves on parent scroll; we can read its rect.
-    function getParentViewportHeight() {
-      try {
-        return window.top.innerHeight || window.parent.innerHeight || window.innerHeight || 800;
-      } catch {
-        return window.innerHeight || 800;
-      }
+    function setWave(panel, wave) {
+      panel.classList.toggle("wave0", wave === 0);
+      panel.classList.toggle("wave1", wave >= 1);
+      panel.classList.toggle("wave2", wave >= 2);
+      panel.classList.toggle("wave3", wave >= 3);
     }
 
-    function getIframeTopInParentViewport() {
-      try {
-        const fe = window.frameElement;
-        if (!fe || !fe.getBoundingClientRect) return 0;
-        return fe.getBoundingClientRect().top;
-      } catch {
-        return 0;
-      }
+    function getWaveForProgress(p) {
+      if (p >= 0.74) return 3;
+      if (p >= 0.42) return 2;
+      if (p >= 0.12) return 1;
+      return 0;
     }
 
-    function maybeReveal(panelMidInParent, parentVh, panel) {
-      if (revealed.has(panel)) return;
-      // Trigger once when panel midpoint enters the viewport with a little pre-roll.
-      const triggerTop = -0.10 * parentVh;
-      const triggerBottom = 1.10 * parentVh;
-      if (panelMidInParent >= triggerTop && panelMidInParent <= triggerBottom) {
-        panel.classList.add("revealed");
-        revealed.add(panel);
-      }
-    }
-
-    let rafId = 0;
     function tick() {
-      rafId = 0;
-
       requestHeightSend();
-      if (reduceMotion) return;
+      if (reduceMotion) {
+        // Show everything immediately.
+        for (const m of sceneMetrics) {
+          if (m.panel) setWave(m.panel, 3);
+          if (m.img) m.img.style.transform = "translate3d(0, 0px, 0)";
+          for (const a of m.accents) a.el.style.setProperty("--p", "0px");
+        }
+        return;
+      }
 
-      const parentVh = getParentViewportHeight();
-      const iframeTop = getIframeTopInParentViewport();
-      const viewportMid = parentVh / 2;
-      const scrollY = getScrollY();
+      const viewportH = scroller ? scroller.clientHeight : window.innerHeight;
+      const scrollTop = scroller ? scroller.scrollTop : 0;
 
-      for (const m of panelMetrics) {
-        if (!m.img) continue;
+      for (const m of sceneMetrics) {
+        if (!m.panel) continue;
 
-        const parallaxMode = (m.panel.getAttribute("data-parallax") || "on").toLowerCase();
-        const floatAmount = parseFloat(m.panel.getAttribute("data-float") || "10");
+        const raw = (scrollTop - m.top) / m.scrollSpan;
+        const p = Math.max(0, Math.min(1, raw));
+        const wave = getWaveForProgress(p);
+        setWave(m.panel, wave);
 
-        // Convert cached document-space mid -> iframe viewport mid.
-        // In Wix, the iframe itself moves within the parent viewport, so add iframeTop.
-        const midInIframeViewport = m.midDoc - scrollY;
-        const midInParentViewport = iframeTop + midInIframeViewport;
+        // Background parallax (fullscreen cover)
+        if (m.img) {
+          if (m.parallaxMode === "off" || m.parallaxMode === "none" || m.parallaxMode === "0") {
+            m.img.style.transform = "translate3d(0, 0px, 0)";
+          } else {
+            // Don't start parallax immediately; hold the background steady until
+            // the user has scrolled further into the scene.
+            const start = Math.max(0, Math.min(0.95, parseFloat(m.panel.getAttribute("data-parallax-start") || "0")));
+            if (p <= start) {
+              m.img.style.transform = "translate3d(0, 0px, 0)";
+              continue;
+            }
 
-        maybeReveal(midInParentViewport, parentVh, m.panel);
-
-        if (parallaxMode === "off" || parallaxMode === "none" || parallaxMode === "0") {
-          // Keep full informational graphic visible: do NOT move the image.
-          m.img.style.transform = "translate3d(0, 0px, 0)";
-
-          // Scroll-linked motion without cropping: gently float the panel itself.
-          // Negative moves up when centered; clamp keeps it subtle.
-          const progress = (midInParentViewport - viewportMid) / viewportMid;
-          const clamped = Math.max(-1, Math.min(1, progress));
-          const y = Math.round(clamped * -floatAmount);
-          m.panel.style.setProperty("--float-y", `${y}px`);
-          continue;
+            const pn = (p - start) / (1 - start);
+            const centered = (pn - 0.5) * 2; // -1..+1
+            const amp = Math.max(0, Math.min(220, parseFloat(m.panel.getAttribute("data-bg-amp") || "36")));
+            const y = Math.round(centered * m.bgSpeed * amp);
+            m.img.style.transform = `translate3d(0, ${y}px, 0)`;
+          }
         }
 
-        // If using image parallax, avoid double motion.
-        m.panel.style.setProperty("--float-y", "0px");
-
-        // progress: -1 (above) to +1 (below)
-        const progress = (midInParentViewport - viewportMid) / viewportMid;
-        const clamped = Math.max(-1, Math.min(1, progress));
-        const translateY = Math.round(clamped * m.speed * 140);
-        m.img.style.transform = `translate3d(0, ${translateY}px, 0)`;
+        // Accent drift (subtle)
+        const centered = (p - 0.5) * 2;
+        for (const a of m.accents) {
+          const y = Math.round(centered * -a.speed * 22);
+          a.el.style.setProperty("--p", `${y}px`);
+        }
       }
     }
 
@@ -325,13 +472,7 @@
 
     // Start: don't block load; wait one frame.
     requestAnimationFrame(() => {
-      // If reduced motion, reveal immediately and send height once.
-      if (reduceMotion) {
-        panels.forEach((p) => p.classList.add("revealed"));
-        panels.forEach((p) => p.style.setProperty("--float-y", "0px"));
-        requestHeightSend();
-        return;
-      }
+      requestHeightSend();
       loop();
     });
   </script>
