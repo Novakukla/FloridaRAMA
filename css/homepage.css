@@ -1,0 +1,459 @@
+@font-face {
+  font-family: Halau;
+  src: url("../assets/halau.ttf") format("truetype");
+  font-display: swap;
+}
+:root {
+  --brand-pink: #ef779f;
+  --brand-blue: #36a8de;
+  --brand-green: #3db489;
+}
+html,
+body {
+  height: 100%;
+}
+body {
+  font-family: Halau, "Baloo 2", system-ui, Roboto, Arial;
+  line-height: 1.3;
+  margin: 0;
+  color: #111;
+  background: #000;
+}
+/* Hero video background */
+.hero {
+  position: relative;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  z-index: 2;
+  pointer-events: auto;
+}
+.keyart {
+  position: fixed;
+  inset: 0;
+  height: 100vh;
+  z-index: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+.scene {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+}
+.sceneLayer {
+  position: absolute;
+  inset: -10%;
+  will-change: transform;
+  transform: translate3d(0, 0, 0);
+}
+.keyart-video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+  pointer-events: none;
+}
+.keyartTitle {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: clamp(128px, 4vh, 56px);
+  display: grid;
+  justify-items: center;
+  z-index: 2;
+}
+.treesDividerScroll {
+  position: relative;
+  z-index: 3;
+  height: clamp(420px, 62vh, 880px);
+  margin-top: calc(-1 * clamp(420px, 62vh, 880px) + 1px);
+  pointer-events: none;
+  background-repeat: no-repeat;
+  background-position: bottom center;
+  background-size: 100% auto;
+  filter: none;
+  opacity: 0;
+}
+.contentBg {
+  background: transparent;
+  position: relative;
+  z-index: 2;
+}
+/* allow hero to sit directly over the fixed keyart/video */
+#maincontain {
+  position: relative;
+  z-index: 2;
+  /* increase this so Section 1 remains visible longer before Section 2 */
+  margin-top: 200vh;
+}
+
+/* decorative layer backgrounds (fallback gradients) */
+.layerSky {
+  background: none;
+}
+.layerMountains {
+}
+/* SectionCover styles (top-level; not nested) */
+/* Keep the section itself free of z-index so it doesn't create a stacking context */
+.sectionBlack {
+  background: #000;
+  color: #fff;
+  position: relative;
+}
+.sectionBlack {
+  overflow: visible;
+}
+.sectionBlack .shape-divider {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 0;
+  transform: translateY(-100%);
+  z-index: 3;
+  pointer-events: none;
+}
+.sectionBlack .shape-divider img {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+/* Make the cover-inner sit above the anchored hero (hero z-index:2) */
+.sectionBlack .cover-inner {
+  height: 120vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+.sectionBlack .cover-box {
+  position: relative;
+  z-index: 4;
+  background: #000;
+  color: #fff;
+  padding: 48px 32px;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  max-width: 980px;
+  width: 90%;
+  text-align: center;
+}
+.hero video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  z-index: 0;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: none;
+  z-index: 1;
+}
+.hero-inner {
+  position: relative;
+  z-index: 2;
+  max-width: 1400px;
+  width: 100%;
+  padding: 6vmin 8vmin;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 3vmin;
+}
+/* anchored state: keep hero elements fixed to viewport during scrollytelling */
+.hero-inner.anchored {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 2;
+  width: min(1200px, 94%);
+}
+
+/* Smooth transitions when toggling anchored state to avoid abrupt jumps */
+.hero-inner {
+  will-change: transform, top, left;
+  transition: transform 0.45s cubic-bezier(0.2, 0.9, 0.2, 1), top 0.45s, left 0.45s;
+}
+.hero-logo {
+  max-width: clamp(320px, 54vw, 1100px);
+  height: auto;
+  display: block;
+  margin: 0;
+}
+.tagline {
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  margin: 0;
+  font-size: clamp(14px, 3.6vw, 28px);
+  text-transform: uppercase;
+}
+/* Step reveal baseline */
+.step {
+  opacity: 0;
+  transform: translateY(10px) scale(0.995);
+  transition:
+    opacity 0.55s cubic-bezier(0.2, 0.9, 0.2, 1),
+    transform 0.55s cubic-bezier(0.2, 0.9, 0.2, 1);
+}
+.step.active {
+  opacity: 1;
+  transform: none;
+}
+.pill.step {
+  opacity: 0;
+  transform: translateY(10px) scale(0.995);
+}
+.pill.step.active {
+  opacity: 1;
+  transform: none;
+}
+/* Buttons row */
+.hero-links {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(12px, 2.4vw, 40px);
+  flex-wrap: wrap;
+}
+.pill {
+  background: var(--brand-green);
+  color: #fff;
+  padding: clamp(10px, 2.2vw, 20px) clamp(16px, 3.8vw, 36px);
+  border-radius: 999px;
+  display: inline-block;
+  text-decoration: none;
+  font-weight: 700;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.32);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  font-size: clamp(14px, 1.9vw, 20px);
+}
+.pill.small {
+  padding: clamp(6px, 1.2vw, 12px) clamp(12px, 2.6vw, 22px);
+}
+/* Crab ticket button in center */
+.crab-wrap {
+  position: relative;
+  display: inline-block;
+}
+.crab-btn {
+  width: clamp(120px, 18vw, 220px);
+  height: clamp(120px, 18vw, 220px);
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+}
+.crab-btn img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  display: block;
+}
+
+/* Crab idle rubber-band animation */
+.crab-btn img {
+  transform-origin: 50% 60%;
+  will-change: transform;
+  animation: crabIdle 3.6s ease-in-out infinite;
+}
+
+.banners {
+  /* show banner images stacked: main lucy image centered, accents overlayed to right */
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  align-items: center;
+  justify-content: center;
+  padding: 1.6rem 0;
+}
+
+/* show both images in flow; constrain size so they fit nicely */
+.banners img.banner {
+  display: block;
+  width: auto;
+  max-width: 48%;
+  height: auto;
+}
+
+/* Top lucy image should be larger and centered */
+.banners img.lucy {
+  max-width: 66%;
+  width: 100%;
+  height: auto;
+  z-index: 2;
+}
+
+/* accents PNG sits to the right as an overlay; doesn't affect flow */
+.banners img.accents {
+  /* overlay the accents centered on top of the lucy image */
+  position: absolute;
+  left: 50%;
+  top: 33%;
+  transform: translate(-50%, -50%);
+  max-width: 66%;
+  height: auto;
+  z-index: 3;
+  pointer-events: none;
+
+  /* idle float animation: run immediately (like the crab) */
+  transform-origin: 50% 50%;
+  opacity: 1;
+  animation-name: idleAccent;
+  animation-duration: 8s;
+  animation-timing-function: ease-in-out;
+  animation-iteration-count: infinite;
+  animation-play-state: running;
+  transition: opacity 0.48s ease-out;
+}
+.banners img.accents.inView {
+  /* when scrolled into view, also run a single pulse on top of idle */
+  animation-name: idleAccent, pulseAccent;
+  animation-duration: 8s, 1.2s;
+  animation-timing-function: ease-in-out, cubic-bezier(0.2, 0.9, 0.2, 1);
+  animation-iteration-count: infinite, 1;
+  animation-fill-mode: both;
+}
+
+@keyframes pulseAccent {
+  0% { transform: translate(-50%, -50%) scale(1); }
+  40% { transform: translate(-50%, -50%) scale(1.06); }
+  70% { transform: translate(-50%, -50%) scale(0.99); }
+  100% { transform: translate(-50%, -50%) scale(1); }
+}
+
+@keyframes idleAccent {
+  0% { transform: translate(-50%, -50%) translateY(0) scale(1); }
+  50% { transform: translate(-50%, -50%) translateY(-6px) scale(1.01); }
+  100% { transform: translate(-50%, -50%) translateY(0) scale(1); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .banners img.accents { transition: none; animation: none !important; opacity: 1; }
+}
+
+.banners-row {
+  display: flex;
+  gap: 1rem;
+  justify-content: space-between;
+  align-items: center;
+  /* make the row match the lucy image width so features align visually */
+  width: 66%;
+  max-width: 66%;
+  margin: 1rem auto 0;
+}
+.banners-row img.feature {
+  /* each feature takes 50% of the row so combined width equals lucy */
+  width: 50%;
+  max-width: 50%;
+  height: auto;
+  display: block;
+}
+
+/* Small screens: stack features and scale images */
+@media (max-width: 720px) {
+  .banners img.lucy { max-width: 88%; }
+  .banners img.accents { max-width: 56%; left: 50%; top: 50%; transform: translate(-50%, -50%); }
+  .banners-row { flex-direction: column; gap: 0.6rem; width: 88%; max-width: 88%; }
+  .banners-row img.feature { width: 100%; max-width: 100%; }
+}
+
+/* Respect reduced motion preferences */
+@media (prefers-reduced-motion: reduce) {
+    .banners { background-attachment: scroll; }
+}
+
+@keyframes crabIdle {
+  0% { transform: translateY(0) scale(1) rotate(0deg); }
+  12% { transform: translateY(-4px) scale(1.04) rotate(-3deg); }
+  30% { transform: translateY(2px) scale(0.98) rotate(2deg); }
+  60% { transform: translateY(-2px) scale(1.02) rotate(-1deg); }
+  100% { transform: translateY(0) scale(1) rotate(0deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crab-btn img { animation: none !important; }
+}
+/* Content area below hero */
+.content {
+  max-width: 980px;
+  margin: 28px auto;
+  padding: 0 16px;
+  background: transparent;
+}
+footer {
+  padding: 20px;
+  text-align: center;
+  color: #ddd;
+  font-size: 14px;
+}
+@media (max-width: 720px) {
+  .crab-btn {
+    width: 84px;
+    height: 84px;
+  }
+  .crab-label {
+    font-size: 12px;
+    bottom: -14px;
+  }
+  .pill {
+    padding: 10px 16px;
+    font-size: 14px;
+  }
+}
+.sectionBlack {
+  background: #000;
+  color: #fff;
+  position: relative;
+}
+.sectionBlack .cover-inner {
+  height: 120vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+}
+.sectionBlack .cover-box {
+  position: relative;
+  z-index: 4;
+  background: #000;
+  color: #fff;
+  padding: 48px 32px;
+  border-radius: 12px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.6);
+  max-width: 980px;
+  width: 90%;
+  text-align: center;
+}
+.sectionBlack.onTop {
+  z-index: 50;
+}
+.sectionBlack.onTop .cover-inner {
+  z-index: 51;
+}
+.sectionBlack.onTop .cover-box {
+  z-index: 52;
+}
+.sectionBlack .cover-box h2 {
+  margin: 0;
+  font-size: clamp(28px, 4vw, 44px);
+}
+/* SectionCover styles end */

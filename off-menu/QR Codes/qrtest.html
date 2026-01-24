@@ -1,0 +1,717 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8" />
+<!-- Baloo 2 font (Wix-friendly, used elsewhere in this repo) -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; }
+
+  :root {
+    --brand-pink: #ef779f;
+    --brand-blue: #36a8de;
+    --brand-green: #3db489;
+    --brand-yellow: #f8c964;
+    --brand-orange: #f47948;
+  }
+
+  html, body {
+    height: 100%;
+  }
+
+  body {
+    margin: 0;
+    font-family: "Baloo 2", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: transparent;
+  }
+
+  .wrap {
+    min-height: 100vh;
+    padding: 64px 240px 56px;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+  }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    width: 100%;
+    max-width: 760px;
+  }
+
+  .stack {
+    width: 100%;
+    max-width: 760px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Desktop sizing: hardcode the square button size (Wix "desktop" breakpoint behavior). */
+  @media (min-width: 681px) {
+    :root {
+      --desktop-card: 240px;
+      --desktop-gap: 12px;
+    }
+
+    .wrap { padding: 56px 120px 48px; }
+
+    .stack {
+      width: fit-content;
+      max-width: none;
+      margin: 0 auto;
+      gap: var(--desktop-gap);
+    }
+
+    .grid {
+      width: fit-content;
+      max-width: none;
+      grid-template-columns: repeat(2, var(--desktop-card));
+      gap: var(--desktop-gap);
+    }
+
+    button.card {
+      width: var(--desktop-card);
+      height: var(--desktop-card);
+      padding: 10px;
+    }
+
+    .tourBtn {
+      width: 100%;
+    }
+  }
+
+  .tourBtn {
+    appearance: none;
+    border: none;
+    border-radius: 16px;
+    background: var(--brand-orange);
+    color: #000;
+    font-family: "Baloo 2", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    font-weight: 700;
+    font-size: clamp(18px, 2.4vw, 26px);
+    padding: 14px 16px;
+    cursor: pointer;
+    text-align: center;
+  }
+
+  .tourBtn:hover { filter: brightness(0.96); }
+  .tourBtn[aria-expanded="true"] { filter: brightness(0.92); }
+
+  .tourPanel {
+    border-radius: 16px;
+    background: rgba(0,0,0,0.04);
+    border: 1px solid rgba(0,0,0,0.12);
+    overflow: hidden;
+    max-height: 0;
+    opacity: 0;
+    transform: translateY(-4px);
+    transition: max-height 220ms ease, opacity 180ms ease, transform 180ms ease;
+  }
+
+  .tourPanel.open {
+    max-height: 1000px;
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  .tourInner {
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .tourHint {
+    font-size: 13px;
+    line-height: 1.2;
+    opacity: 0.75;
+  }
+
+  .videoShell {
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 14px;
+    overflow: hidden;
+    background: #000;
+    position: relative;
+  }
+
+  .tourFrame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    display: block;
+    pointer-events: none; /* disables tapping/clicking the YouTube UI */
+  }
+
+  button.card {
+    aspect-ratio: 1 / 1;            /* square */
+    border: none;
+    border-radius: 16px;
+    color: #000;
+    font-size: clamp(16px, 2.8vw, 30px);
+    font-weight: 600;
+    cursor: pointer;
+    padding: clamp(8px, 1.2vw, 12px);
+    text-align: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Baloo 2", system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    line-height: 1.05;
+  }
+
+  button.card:hover {
+    filter: brightness(0.95);
+  }
+
+  .pink   { background: var(--brand-pink); }
+  .blue   { background: var(--brand-blue); }
+  .green  { background: var(--brand-green); }
+  .yellow { background: var(--brand-yellow); }
+
+  /* modal */
+  .backdrop {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: flex-start;
+    justify-content: center;
+    background: rgba(0,0,0,0.85);
+    z-index: 9999;
+    --modal-anchor-y: 0px;
+    --modal-max-h: 80vh;
+    padding-top: max(12px, env(safe-area-inset-top), calc(var(--modal-anchor-y) + 12px));
+    padding-right: max(12px, env(safe-area-inset-right));
+    padding-bottom: max(12px, env(safe-area-inset-bottom));
+    padding-left: max(12px, env(safe-area-inset-left));
+  }
+  .backdrop.open { display: flex; }
+
+  .modal {
+    width: 80vw;
+    height: auto;
+    max-height: min(80vh, var(--modal-max-h, 80vh));
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px;
+    position: relative;
+    box-shadow: 0 10px 35px rgba(0,0,0,0.25);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+
+  .modal.tall {
+    height: min(80vh, var(--modal-max-h, 80vh));
+  }
+
+  @media (max-width: 680px) {
+    .modal {
+      width: 94vw;
+      max-height: min(88vh, var(--modal-max-h, 88vh));
+    }
+
+    .modal.tall {
+      height: min(88vh, var(--modal-max-h, 88vh));
+    }
+  }
+
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(255,255,255,0.9);
+    border: none;
+    font-size: 20px;
+    cursor: pointer;
+    width: 38px;
+    height: 38px;
+    border-radius: 999px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .close:hover { filter: brightness(0.98); }
+
+  .text {
+    margin-top: 12px;
+    font-size: clamp(18px, 4.6vw, 30px);
+    line-height: 1.25;
+    flex: 1 1 auto;
+    overflow: auto;
+    -ms-overflow-style: none; /* IE/Edge */
+    scrollbar-width: none; /* Firefox */
+  }
+
+  .text::-webkit-scrollbar { display: none; }
+
+  .modalTitle {
+    font-weight: 700;
+    font-size: clamp(16px, 3.8vw, 20px);
+    line-height: 1.1;
+    margin: 0;
+  }
+
+  .modalHeader {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 12px;
+    margin-bottom: 10px;
+    flex-wrap: wrap;
+  }
+
+  .miniPage {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    min-height: 0;
+  }
+
+  .modalNote {
+    margin-top: 10px;
+    font-size: 12px;
+    line-height: 1.2;
+    opacity: 0.75;
+  }
+
+  .modalActions {
+    display: flex;
+    gap: 10px;
+    margin-top: 12px;
+  }
+
+  .actionBtn {
+    appearance: none;
+    border: 1px solid rgba(0,0,0,0.2);
+    background: #fff;
+    border-radius: 10px;
+    padding: 9px 11px;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    text-decoration: none;
+    color: #000;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .actionBtn:hover {
+    filter: brightness(0.98);
+  }
+
+  .previewFrame {
+    width: 100%;
+    height: 100%;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 12px;
+    flex: 1 1 auto;
+    min-height: 0;
+  }
+
+  .scaledIframeWrap {
+    width: 100%;
+    flex: 1 1 auto;
+    min-height: 0;
+    overflow: hidden;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 12px;
+    background: #fff;
+    --scale: 0.74;
+  }
+
+  /* Artist page tends to be wider/denser; scale it a bit more */
+  .scaledIframeWrap.artistPreview {
+    --scale: 0.62;
+  }
+
+  @media (max-width: 680px) {
+    .scaledIframeWrap { --scale: 0.68; }
+    /* On mobile, let Wix see a mobile-sized viewport so it serves the mobile layout */
+    .scaledIframeWrap.artistPreview { --scale: 1; }
+  }
+
+  .scaledIframe {
+    width: calc(100% / var(--scale));
+    height: calc(100% / var(--scale));
+    border: 0;
+    display: block;
+    transform: scale(var(--scale));
+    transform-origin: 0 0;
+  }
+
+  .shopPreview {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .productGrid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 12px;
+    align-items: start;
+    align-content: start;
+  }
+
+  .productCard {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid rgba(0,0,0,0.15);
+    border-radius: 12px;
+    overflow: hidden;
+    text-decoration: none;
+    color: #000;
+    background: #fff;
+    align-self: start;
+  }
+
+  .productCard:hover { filter: brightness(0.99); }
+
+  .productImgWrap {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    background: rgba(0,0,0,0.04);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .productImg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .productMeta {
+    padding: 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .productName {
+    font-weight: 700;
+    font-size: 16px;
+    line-height: 1.1;
+  }
+
+  .productPrice {
+    font-weight: 700;
+    font-size: 14px;
+    opacity: 0.85;
+  }
+
+  @media (max-width: 800px) {
+    .productGrid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  }
+
+  @media (max-width: 520px) {
+    .productGrid { grid-template-columns: 1fr; }
+  }
+
+  @media (max-width: 1023px) {
+    .wrap { padding: 64px 80px 56px; }
+  }
+
+  /* Desktop-only: tighten button sizing without affecting mobile */
+  @media (min-width: 681px) {
+    .tourBtn {
+      font-size: clamp(16px, 1.6vw, 20px);
+      padding: 12px 14px;
+    }
+
+    button.card {
+      font-size: clamp(15px, 1.8vw, 22px);
+      padding: clamp(6px, 0.8vw, 9px);
+    }
+  }
+
+  @media (max-width: 680px) {
+    .wrap { padding: 42px 18px 18px; }
+    .grid { gap: 12px; }
+    button.card { border-radius: 14px; }
+    .tourBtn { border-radius: 14px; }
+
+    /* Mobile-only: lists inside the modal read better smaller */
+    .text ul {
+      font-size: 15px;
+      line-height: 1.25;
+      margin: 8px 0 0;
+      padding-left: 18px;
+    }
+
+    .text li {
+      margin: 0 0 6px;
+    }
+  }
+
+  @media (max-width: 420px) {
+    .wrap { padding: 36px 14px 14px; }
+  }
+</style>
+</head>
+
+<body>
+  <div class="wrap">
+    <div class="stack">
+      <button class="tourBtn" id="tourBtn" type="button" aria-expanded="false" aria-controls="tourPanel"><span aria-hidden="true">🎧</span><br><span>Audio/Video Tour</span></button>
+      <div class="tourPanel" id="tourPanel" aria-hidden="true">
+        <div class="tourInner">
+          <div class="videoShell">
+            <iframe
+              class="tourFrame"
+              id="tourFrame"
+              title="Audio/Video Tour"
+              referrerpolicy="strict-origin-when-cross-origin"
+                allow="autoplay; encrypted-media; picture-in-picture"
+            ></iframe>
+          </div>
+          <div class="tourHint">Video plays automatically. Controls are disabled on purpose.</div>
+        </div>
+      </div>
+
+      <div class="grid">
+        <button class="card pink" data-i="0">🔍 FloridaRAMA Clues & Games</button>
+        <button class="card blue" data-i="1">🌴 Florida & FloridaRAMA Facts</button>
+        <button class="card green" data-i="2">🎨 Artist / Art Info</button>
+        <button class="card yellow" data-i="3">🛒 Shop </button>
+        <div></div> <!-- empty 4th slot -->
+      </div>
+    </div>
+  </div>
+
+  <div class="backdrop" id="backdrop">
+    <div class="modal">
+      <button class="close" id="closeBtn">✕</button>
+      <div class="text" id="modalText"></div>
+    </div>
+  </div>
+
+  <script>
+    // Each button should have its own dedicated list of lines.
+    const artistUrl = "https://www.floridarama.art/artist/rhys-meatyard";
+    const shopUrl = "https://shop.floridarama.art/";
+    const tourYouTubeId = "UlL_kpGx1po";
+
+    // Room-related product picks (swap these per-room if/when you add room detection).
+    const shopRoomPicks = [
+      {
+        url: "https://shop.floridarama.art/rhys-meatyard-3d-apocalyptic-soup-can-cs.html",
+        title: "Rhys Meatyard's 3D Apocalyptic Soup Cans",
+        price: "$100.00",
+        img: "https://cdn.shoplightspeed.com/shops/642126/files/71605343/1652x1652x1/rhys-meatyard-rhys-meatyards-3d-apocalyptic-soup-c.jpg"
+      },
+      {
+        url: "https://shop.floridarama.art/rhys-meatyard-print-the-peets-of-despair-8x6-cs.html",
+        title: "Rhys Meatyard's \"The Peets of Despair\" 8\" x 6\" Art Print",
+        price: "$35.00",
+        img: "https://cdn.shoplightspeed.com/shops/642126/files/70665396/1652x1652x1/rhys-meatyard-rhys-meatyards-the-peets-of-despair.jpg"
+      },
+      {
+        url: "https://shop.floridarama.art/rhys-meatyard-sticker-sheet-apocalyptic-soup-cans.html",
+        title: "Rhys Meatyard's \"Apocalyptic Soup Cans\" Sticker Sheet",
+        price: "$10.00",
+        img: "https://cdn.shoplightspeed.com/shops/642126/files/70665563/1652x1652x1/rhys-meatyard-rhys-meatyards-apocalyptic-soup-cans.jpg"
+      }
+    ];
+
+    const buttonLists = {
+      0: [
+        "FloridaRAMA clue hunts, hidden details, and interactive games live here.",
+        "This shape, ✦, is a Mermaid Star — you encounter it in several forms throughout the experience.",
+        "Look for foot pedals and step on them.",
+        "Bonus points for finding the many, many instances of word play throughout the experience (Mermaid Star is one)."
+      ],
+      1: [
+        "The Mermaid Star Motel has a lobby and 6 motel rooms on its ground floor, You will explore each of these rooms",
+        "Florida’s largest industries are travel & tourism, real estate & development and healthcare. The Interest has its fingers on all 3. ",
+        "Florida has over 22 million residents and is the third most populous state in the United States.",
+        "Florida has the longest coastline (1,197 statute miles) in the contiguous United States, with 825 miles of accessible beaches to enjoy.",
+        "FloridaRAMA is 15,000 ft2, features 80+ artists, over 300 unique soundtracks and over 1 billion pixels."
+      ],
+      2: [
+        "Learn about the artists featured in this space.",
+        "Look for artist credits and titles near the work.",
+        "Ask a team member if you want deeper art info."
+      ],
+      3: [
+        "Shop FloridaRAMA merch and souvenirs.",
+        "Perfect gifts: stickers, prints, and more.",
+        "Ask staff about limited items."
+      ]
+    };
+
+    const backdrop = document.getElementById("backdrop");
+    const modalText = document.getElementById("modalText");
+    const closeBtn = document.getElementById("closeBtn");
+    const modal = backdrop.querySelector(".modal");
+
+    const tourBtn = document.getElementById("tourBtn");
+    const tourPanel = document.getElementById("tourPanel");
+    const tourFrame = document.getElementById("tourFrame");
+
+    let isModalOpen = false;
+
+    function updateModalAnchor() {
+      // Anchor the modal *below* the Audio/Video Tour button.
+      const rect = tourBtn.getBoundingClientRect();
+      const rawAnchor = rect.bottom;
+      const anchorY = Math.max(0, Math.min(rawAnchor, window.innerHeight));
+      const topPad = anchorY + 12;
+      const bottomPad = 12;
+      const maxH = Math.max(180, window.innerHeight - topPad - bottomPad);
+
+      backdrop.style.setProperty("--modal-anchor-y", `${anchorY}px`);
+      backdrop.style.setProperty("--modal-max-h", `${maxH}px`);
+    }
+
+    function onViewportChange() {
+      if (!isModalOpen) return;
+      updateModalAnchor();
+    }
+
+    function getTourEmbedUrl(autoplay) {
+      const base = `https://www.youtube-nocookie.com/embed/${tourYouTubeId}`;
+      const params = new URLSearchParams({
+        autoplay: autoplay ? "1" : "0",
+        mute: "1",
+        controls: "0",
+        fs: "0",
+        playsinline: "1",
+        rel: "0",
+        modestbranding: "1"
+      });
+      return `${base}?${params.toString()}`;
+    }
+
+    function openTour() {
+      tourPanel.classList.add("open");
+      tourPanel.setAttribute("aria-hidden", "false");
+      tourBtn.setAttribute("aria-expanded", "true");
+      tourFrame.src = getTourEmbedUrl(true);
+    }
+
+    function closeTour() {
+      tourPanel.classList.remove("open");
+      tourPanel.setAttribute("aria-hidden", "true");
+      tourBtn.setAttribute("aria-expanded", "false");
+      tourFrame.removeAttribute("src");
+    }
+
+    function escapeHtml(value) {
+      return String(value)
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;")
+        .replaceAll('"', "&quot;")
+        .replaceAll("'", "&#39;");
+    }
+
+    function renderList(lines) {
+      if (!Array.isArray(lines) || lines.length === 0) return "";
+      const items = lines.map(line => `<li>${escapeHtml(line)}</li>`).join("");
+      return `<ul>${items}</ul>`;
+    }
+
+    function openModal(html, options = {}) {
+      const isTall = options.tall === true;
+      modal.classList.toggle("tall", isTall);
+      modalText.innerHTML = html;
+      isModalOpen = true;
+      updateModalAnchor();
+      window.addEventListener("resize", onViewportChange, { passive: true });
+      window.addEventListener("scroll", onViewportChange, { passive: true });
+      backdrop.classList.add("open");
+    }
+
+    function closeModal() {
+      modal.classList.remove("tall");
+      isModalOpen = false;
+      window.removeEventListener("resize", onViewportChange);
+      window.removeEventListener("scroll", onViewportChange);
+      backdrop.classList.remove("open");
+    }
+
+    tourBtn.addEventListener("click", () => {
+      const isOpen = tourPanel.classList.contains("open");
+      if (isOpen) closeTour();
+      else openTour();
+    });
+
+    function renderArtistMiniPage() {
+      return `
+        <div class="miniPage">
+          <div class="modalHeader">
+            <a class="actionBtn" href="${artistUrl}" target="_blank" rel="noopener noreferrer">Open in New Tab</a>
+            <div class="modalTitle">Artist: Rhys Meatyard</div>
+          </div>
+          <div class="scaledIframeWrap artistPreview">
+            <iframe class="scaledIframe" src="${artistUrl}" title="Artist Page Preview" loading="lazy"></iframe>
+          </div>
+        </div>
+      `;
+    }
+
+    function renderShopMiniPage() {
+      const cards = shopRoomPicks.map(p => `
+        <a class="productCard" href="${p.url}" target="_blank" rel="noopener noreferrer">
+          <div class="productImgWrap">
+            <img class="productImg" src="${p.img}" alt="${escapeHtml(p.title)}" loading="lazy" />
+          </div>
+          <div class="productMeta">
+            <div class="productName">${escapeHtml(p.title)}</div>
+            <div class="productPrice">${escapeHtml(p.price)}</div>
+          </div>
+        </a>
+      `).join("");
+
+      return `
+        <div class="miniPage">
+          <div class="modalHeader">
+            <a class="actionBtn" href="${shopUrl}" target="_blank" rel="noopener noreferrer">Open in New Tab</a>
+            <div class="modalTitle">Shop Picks for This Room</div>
+          </div>
+          <div class="shopPreview">
+            <div class="productGrid">${cards}</div>
+            <div class="modalNote">Tap a product to open it in a new tab.</div>
+          </div>
+        </div>
+      `;
+    }
+
+    document.querySelectorAll("button.card").forEach(btn => {
+      btn.addEventListener("click", () => {
+        if (btn.dataset.i === "2") {
+          openModal(renderArtistMiniPage(), { tall: true });
+          return;
+        }
+
+        if (btn.dataset.i === "3") {
+          openModal(renderShopMiniPage(), { tall: false });
+          return;
+        }
+
+        const list = buttonLists[btn.dataset.i];
+        openModal(renderList(list), { tall: false });
+      });
+    });
+
+    closeBtn.addEventListener("click", closeModal);
+    backdrop.addEventListener("click", e => {
+      if (e.target === backdrop) closeModal();
+    });
+  </script>
+</body>
+</html>

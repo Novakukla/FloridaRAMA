@@ -1,480 +1,134 @@
 <!doctype html>
-<html>
-<head>
-  <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width,initial-scale=1" />
-  <style>
-    :root{
-      --radius: 18px;
-      --gap: 18px;
-      --shadow: 0 12px 30px rgba(0,0,0,.18);
-      --overlay-opacity: 0;
-    }
-
-    html, body { margin:0; padding:0; background:transparent; height:100%; overflow:hidden; }
-    body { font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
-
-    .scroller{
-      height: var(--embed-h, 100vh);
-      overflow-y: auto;
-      overscroll-behavior: contain;
-      -webkit-overflow-scrolling: touch;
-      scrollbar-width: none; /* Firefox */
-    }
-    .scroller::-webkit-scrollbar{ width:0; height:0; }
-
-    .after{
-      width: 100%;
-      box-sizing: border-box;
-      padding: var(--gap);
-      display: grid;
-      gap: var(--gap);
-    }
-
-    .scene{
-      position: relative;
-      height: 220vh; /* scroll room for 3 waves */
-      padding: var(--gap);
-      box-sizing: border-box;
-    }
-
-    .panel{
-      position: relative;
-      height: auto;
-      aspect-ratio: var(--aspect, 16 / 9);
-      border-radius: var(--radius);
-      overflow: hidden;
-      box-shadow: var(--shadow);
-      --reveal-y: 0px;
-      --float-y: 0px;
-      --hover-y: 0px;
-      transform: translate3d(0, calc(var(--reveal-y) + var(--float-y) + var(--hover-y)), 0);
-      opacity: 1;
-      transition: transform 700ms ease, opacity 700ms ease;
-      will-change: transform, opacity;
-      background: transparent;
-    }
-
-    /* Optional reveal-once (for non-hero panels) */
-    .panel[data-reveal="on"]{
-      --reveal-y: 18px;
-      opacity: 0;
-    }
-
-    /* Fullscreen hero panel (sticky inside scene) */
-    .panel.hero{
-      position: sticky;
-      top: var(--gap);
-      /* Keep the hero landscape even if Wix constrains width */
-      height: min(
-        calc(var(--embed-h, 100vh) - (var(--gap) * 2)),
-        calc(100vw * 9 / 16)
-      );
-      aspect-ratio: auto;
-    }
-
-    .panel.revealed{
-      --reveal-y: 0px;
-      opacity: 1;
-    }
-
-    /* Wave gates: accents appear as you keep scrolling */
-    .panel.wave0 .accent{ opacity: 0; }
-    .panel.wave1 .accent[data-wave="1"],
-    .panel.wave2 .accent[data-wave="1"],
-    .panel.wave3 .accent[data-wave="1"]{ opacity: 1; }
-    .panel.wave2 .accent[data-wave="2"],
-    .panel.wave3 .accent[data-wave="2"]{ opacity: 1; }
-    .panel.wave3 .accent[data-wave="3"]{ opacity: 1; }
-
-    /* The parallax layer (image) */
-    .layer{
-      position:absolute;
-      inset: 0;
-      will-change: transform;
-      transform: translate3d(0,0,0);
-    }
-    .layer img{
-      width:100%;
-      height:100%;
-      object-fit: contain;
-      display:block;
-      transform: translate3d(0,0,0);
-      will-change: transform;
-      user-select: none;
-      pointer-events: none;
-      background: transparent;
-    }
-
-    /* Optional: allow true background-style banners */
-    .panel[data-fit="cover"] .layer{
-      inset: -10% 0; /* extra vertical room for background parallax */
-    }
-    .panel[data-fit="cover"] .layer img{
-      object-fit: cover;
-    }
-
-    /* subtle readability overlay (optional) */
-    .overlay{
-      position:absolute;
-      inset:0;
-      background: linear-gradient(
-        to bottom,
-        rgba(0,0,0,0.08),
-        rgba(0,0,0,0.10) 35%,
-        rgba(0,0,0,0.18)
-      );
-      opacity: var(--overlay-opacity);
-      pointer-events:none;
-    }
-
-    /* Accent layers (foreground elements that can reveal + parallax) */
-    .accents{
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      z-index: 2;
-    }
-
-    .accent{
-      position: absolute;
-      display: block;
-      width: var(--w, clamp(160px, 24vw, 460px));
-      height: auto;
-      opacity: 0;
-      --enter-y: 10px;
-      --p: 0px;
-      transform: translate3d(0, calc(var(--enter-y) + var(--p)), 0);
-      transition: transform 650ms ease, opacity 650ms ease;
-      transition-delay: var(--delay, 0ms);
-      will-change: transform, opacity;
-      user-select: none;
-    }
-
-    .panel.wave1 .accent[data-wave="1"],
-    .panel.wave2 .accent[data-wave="1"],
-    .panel.wave3 .accent[data-wave="1"],
-    .panel.wave2 .accent[data-wave="2"],
-    .panel.wave3 .accent[data-wave="2"],
-    .panel.wave3 .accent[data-wave="3"]{
-      --enter-y: 0px;
-    }
-
-    /* Simple placement helpers (tweak per banner) */
-    .pos-tl{ top: clamp(10px, 2vw, 22px); left: clamp(10px, 2vw, 22px); }
-    .pos-tr{ top: clamp(10px, 2vw, 22px); right: clamp(10px, 2vw, 22px); }
-    .pos-tm{ top: clamp(10px, 2vw, 22px); left: 50%; transform: translate3d(-50%, calc(var(--enter-y) + var(--p)), 0); }
-    .pos-bm{ bottom: clamp(10px, 2vw, 22px); left: 50%; transform: translate3d(-50%, calc(var(--enter-y) + var(--p)), 0); }
-    .pos-bl{ bottom: clamp(10px, 2vw, 22px); left: clamp(10px, 2vw, 22px); }
-    .pos-br{ bottom: clamp(10px, 2vw, 22px); right: clamp(10px, 2vw, 22px); }
-
-
-    /* last row split into 2 */
-    .split{
-      display:grid;
-      grid-template-columns: 1fr 1fr;
-      gap: var(--gap);
-    }
-
-    .panel.linklike { cursor: pointer; }
-
-    /* optional hover polish (desktop only) */
-    @media (hover:hover) and (pointer:fine){
-      .panel.linklike:hover{
-        --hover-y: -2px;
-      }
-    }
-
-    @media (max-width: 820px){
-      :root{ --gap: 12px; }
-      .after{ padding: 12px; gap: 12px; }
-      .split{ grid-template-columns: 1fr; }
-    }
-
-    @media (prefers-reduced-motion: reduce){
-      .panel{ transition: none; transform:none; opacity:1; }
-      .layer{ inset:0; }
-      .scroller{ scroll-behavior: auto; }
-    }
-  </style>
-</head>
-
-<body>
-  <div class="scroller" id="scroller">
-    <!-- Scene 1: Lucy (fullscreen + waves) -->
-    <div class="scene" data-scene>
-      <section class="panel hero linklike wave0" data-fit="cover" data-parallax="on" data-parallax-start="0.25" data-bg-amp="36" data-speed="0.22" data-href="/lucy-sparrow" aria-label="Lucy Sparrow">
-        <div class="layer">
-          <img alt="Lucy Sparrow background"
-            src="https://static.wixstatic.com/media/400eb0_825f55c593d3439e841e8883b43875a8~mv2.png">
-        </div>
-
-        <div class="accents" aria-hidden="true">
-          <!-- Wave 1 -->
-          <img class="accent pos-tr" data-wave="1" style="--delay: 0ms; --w: clamp(170px, 26vw, 520px);" data-speed="0.55"
-            alt="" src="https://static.wixstatic.com/media/400eb0_54de5a9ecec941ac820e10400d3b2345~mv2.png">
-          <img class="accent pos-tl" data-wave="1" style="--delay: 0ms; --w: clamp(170px, 26vw, 520px);" data-speed="0.52"
-            alt="" src="https://static.wixstatic.com/media/400eb0_ee6cd8a48e584553b7aac51cc8d63ec4~mv2.png">
-          <img class="accent pos-tm" data-wave="1" style="--delay: 0ms; --w: clamp(200px, 30vw, 640px);" data-speed="0.60"
-            alt="" src="https://static.wixstatic.com/media/400eb0_89a311f88b79475393701a16b8117373~mv2.png">
-
-          <!-- Wave 2 -->
-          <img class="accent pos-bm" data-wave="2" style="--delay: 0ms; --w: clamp(360px, 56vw, 1400px);" data-speed="0.40"
-            alt="" src="https://static.wixstatic.com/media/400eb0_811d4dc357b94942879d905582613a5f~mv2.png">
-
-          <!-- Wave 3 -->
-          <img class="accent pos-br" data-wave="3" style="--delay: 0ms; --w: clamp(160px, 24vw, 420px);" data-speed="0.45"
-            alt="" src="https://static.wixstatic.com/media/400eb0_3eeefb1abb634af7b3c1f1e3e4659033~mv2.png">
-        </div>
-
-        <div class="overlay"></div>
-      </section>
-    </div>
-
-    <!-- Scene 2: HoliDAZE (fullscreen + waves) -->
-    <div class="scene" data-scene>
-      <section class="panel hero linklike wave0" data-fit="cover" data-parallax="on" data-parallax-start="0.25" data-bg-amp="32" data-speed="0.18" data-href="/holidaze" aria-label="HoliDAZE">
-        <div class="layer">
-          <img alt="HoliDAZE background"
-            src="https://static.wixstatic.com/media/400eb0_257a1b90406a40ec85b52bef8bb909d6~mv2.png">
-        </div>
-
-        <div class="accents" aria-hidden="true">
-          <!-- Wave 1 -->
-          <img class="accent pos-bm" data-wave="1" style="--delay: 0ms; --w: clamp(320px, 48vw, 1100px);" data-speed="0.42"
-            alt="" src="https://static.wixstatic.com/media/400eb0_0d0e61c28f73423085f6b95dad53155e~mv2.png">
-
-          <!-- Wave 2 -->
-          <img class="accent pos-tl" data-wave="2" style="--delay: 0ms; --w: clamp(170px, 26vw, 520px);" data-speed="0.55"
-            alt="" src="https://static.wixstatic.com/media/400eb0_798b99bd89114a1d8fd4ca7ea1e4d91b~mv2.png">
-
-          <!-- Wave 3 -->
-          <img class="accent pos-bl" data-wave="3" style="--delay: 0ms; --w: clamp(170px, 26vw, 560px);" data-speed="0.50"
-            alt="" src="https://static.wixstatic.com/media/400eb0_a1da6682544c49db922cfaec65d764c0~mv2.png">
-        </div>
-
-        <div class="overlay"></div>
-      </section>
-    </div>
-
-    <!-- After: Split row -->
-    <div class="after" id="after">
-      <div class="split">
-        <section class="panel linklike" style="--aspect: 16 / 9;" data-reveal="on" data-parallax="off" data-speed="0.20" data-href="/membership" aria-label="Membership">
-          <div class="layer">
-            <img alt="Membership banner"
-              src="https://static.wixstatic.com/media/400eb0_41b4f29a318543a4af2f1101d781e96b~mv2.png">
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>FloridaRAMA</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@400;600;700&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/homepage.css">
+  </head>
+  <body>
+    <main id="content">
+      <div class="keyart" id="parallax" data-keyart>
+        <div class="scene" aria-hidden="true">
+          <div class="sceneLayer layerVid" data-speed="2" data-follow="0">
+            <video class="keyart-video" autoplay muted loop playsinline preload="auto" aria-hidden="true">
+              <source src="assets/introvid.mp4" type="video/mp4">
+            </video>
           </div>
-          <div class="overlay"></div>
-        </section>
+        </div>
+        <div class="keyartTitle" aria-label="FloridaRAMA">
+          <section class="hero" role="banner" aria-label="FloridaRAMA hero">
+            <div class="hero-inner">
+              <img class="hero-logo step" data-step="1" src="assets/logolong.png" alt="FloridaRAMA" />
+              <div class="tagline step" data-step="2">
+                Cooler than a museum • Smarter than a theme park • Weirder than
+                a carnival
+              </div>
 
-        <section class="panel linklike" style="--aspect: 16 / 9;" data-reveal="on" data-parallax="off" data-speed="0.16" data-href="/gift-box" aria-label="Gift Box">
-          <div class="layer">
-            <img alt="Gift box banner"
-              src="https://static.wixstatic.com/media/400eb0_a903ed97156c48cd9d4cd608c4f1c924~mv2.png">
+              <div class="hero-links" aria-hidden="false">
+                <a class="pill small step" data-step="4" href="/memberships">Memberships</a>
+                <a class="pill small step" data-step="4" href="/immersive-games">Games</a>
+
+                <div class="crab-wrap step" data-step="3">
+                  <a class="crab-btn" href="/tickets" aria-label="Get Tickets">
+                    <img src="assets/crab.png" alt="Get Tickets" />
+                  </a>
+                </div>
+
+                <a class="pill small step" data-step="4" href="/events">Events</a>
+                <a class="pill small step" data-step="4" href="/shop">Shop Art</a>
+            </div>
           </div>
-          <div class="overlay"></div>
         </section>
       </div>
     </div>
-  </div>
 
+    <div id="maincontain">
+      <div class="shapeDivider" aria-hidden="true"></div>
+      <div class="contentBg">
+        <main>
+          <!-- Section 2: black cover that scrolls up and hides the locked video -->
+          <section class="section sectionBlack" id="sectionCover">
+            <div class="banners">
+              <img class="banner lucy" src="assets/lucy.png" alt="Lucy" />
+              <img class="banner accents reveal" src="assets/lucy_accents.png" alt="" />
+
+              <div class="banners-row">
+                <img class="feature left" src="assets/membership.png" alt="Membership" />
+                <img class="feature right" src="assets/giftbox.png" alt="Gift box" />
+              </div>
+            </div>
+            
+            <div class="shape-divider" aria-hidden="true">
+              <img src="assets/shapeDivider.svg" alt="" />
+            </div>
+            <div class="cover-inner">
+            </div>
+          </section>
+
+          <section class="section sectionBlack" id="sectionCover">
+            <h2>Why Visit FloridaRAMA?</h2>
+            <ul>
+              <li>Cooler than a museum, smarter than a theme park, and weirder than a carnival.</li>
+              <li>Indoor immersive art museum + Florida-themed family attraction in St. Pete.</li>
+              <li>Designed for all ages and interests.</li>
+              <li>80+ artist partners, most of them local.</li>
+              <li>Playful installations celebrating original Florida stories.</li>
+              <li>Beyond exhibits: games and a full calendar of events.</li>
+              <li>Also Tampa Bay’s most unique events venue.</li>
+              <li>Host private gatherings, corporate events, social affairs, kids’ parties, and more.</li>
+            </ul>
+          </section>
+          </section>
+        </main>
+      </div>
+    </div>
+
+    <footer>© 2025 FloridaRAMA — Local starter copy for development</footer>
+  </body>
+  <script src="js/main.js" defer></script>
+  <!-- DEBUG: stacking inspector (remove when done) -->
   <script>
-    const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    const scroller = document.getElementById("scroller");
-    const panels = Array.from(document.querySelectorAll(".panel"));
-    const scenes = Array.from(document.querySelectorAll("[data-scene]"));
-
-    // Reveal-once for non-hero panels inside the internal scroller
-    const revealPanels = panels.filter((p) => p.getAttribute("data-reveal") === "on");
-    const revealedOnce = new WeakSet();
-    const io = ("IntersectionObserver" in window) && scroller
-      ? new IntersectionObserver((entries) => {
-          for (const entry of entries) {
-            if (!entry.isIntersecting) continue;
-            entry.target.classList.add("revealed");
-            revealedOnce.add(entry.target);
-            io.unobserve(entry.target);
-          }
-        }, { root: scroller, threshold: 0.12 })
-      : null;
-
-    if (io) revealPanels.forEach((p) => io.observe(p));
-
-    // Click-through (keeps Wix routing simple)
-    function navigateTop(href) {
-      if (!href) return;
+    window.addEventListener("load", () => {
       try {
-        window.top.location.href = href;
-      } catch {
-        window.location.href = href;
-      }
-    }
+        const hs = document.querySelector(".hero-inner");
+        const cover = document.getElementById("sectionCover");
+        const coverBox = document.querySelector(".sectionBlack .cover-box");
+        const keyart = document.querySelector(".keyart");
 
-    panels.forEach((panel) => {
-      panel.setAttribute("tabindex", "0");
-      panel.addEventListener("click", () => navigateTop(panel.getAttribute("data-href")));
-      panel.addEventListener("keydown", (e) => {
-        if (e.key === "Enter" || e.key === " ") {
-          e.preventDefault();
-          navigateTop(panel.getAttribute("data-href"));
-        }
-      });
-    });
-
-    // Cache scene geometry in scroller space so we can drive waves + parallax.
-    let sceneMetrics = [];
-    function recalcMetrics() {
-      const viewportH = scroller ? scroller.clientHeight : window.innerHeight;
-      sceneMetrics = scenes.map((scene) => {
-        const panel = scene.querySelector(".panel");
-        const img = panel ? panel.querySelector(".layer img") : null;
-        const bgSpeed = panel ? parseFloat(panel.getAttribute("data-speed") || "0.18") : 0.18;
-        const parallaxMode = panel ? (panel.getAttribute("data-parallax") || "on").toLowerCase() : "on";
-        const accents = panel
-          ? Array.from(panel.querySelectorAll(".accent")).map((el) => ({
-              el,
-              speed: parseFloat(el.getAttribute("data-speed") || "0.45"),
-              wave: parseInt(el.getAttribute("data-wave") || "1", 10),
-            }))
-          : [];
-
-        const top = scene.offsetTop;
-        const height = scene.offsetHeight;
-        const scrollSpan = Math.max(1, height - viewportH);
-        return { scene, panel, img, bgSpeed, parallaxMode, accents, top, height, scrollSpan };
-      });
-    }
-    recalcMetrics();
-
-    // Wix iframe sizing: in scrollytelling mode we want a fullscreen embed.
-    let lastSentHeight = -1;
-    let heightRaf = 0;
-    function getDesiredEmbedHeight() {
-      // In Wix, the iframe element can be taller than the actual browser viewport.
-      // If we can read the top window height, use it so "fullscreen" is truly fullscreen.
-      try {
-        const h = window.top.innerHeight;
-        if (typeof h === "number" && h > 0) return h;
-      } catch {
-        // ignore cross-origin
-      }
-
-      // Cross-origin fallback: cap to the physical screen height so we don't
-      // accidentally treat an oversized iframe as the viewport.
-      const inner = window.innerHeight || 700;
-      const cap = window.screen?.availHeight || window.screen?.height || inner;
-      return Math.max(320, Math.min(inner, cap));
-    }
-
-    function applyEmbedHeight(h) {
-      document.documentElement.style.setProperty("--embed-h", `${h}px`);
-    }
-
-    function sendHeight() {
-      heightRaf = 0;
-      const height = getDesiredEmbedHeight();
-      applyEmbedHeight(height);
-      if (height === lastSentHeight) return;
-      lastSentHeight = height;
-      window.parent.postMessage({ type: "WIX_EMBED_HEIGHT", height }, "*");
-    }
-    function requestHeightSend() {
-      if (heightRaf) return;
-      heightRaf = requestAnimationFrame(sendHeight);
-    }
-
-    // Watch for layout changes (responsive reflow, etc.)
-    const ro = ("ResizeObserver" in window)
-      ? new ResizeObserver(() => {
-          recalcMetrics();
-          requestHeightSend();
-        })
-      : null;
-
-    if (ro) ro.observe(document.documentElement);
-    window.addEventListener("resize", () => {
-      recalcMetrics();
-      requestHeightSend();
-    }, { passive: true });
-
-    function setWave(panel, wave) {
-      panel.classList.toggle("wave0", wave === 0);
-      panel.classList.toggle("wave1", wave >= 1);
-      panel.classList.toggle("wave2", wave >= 2);
-      panel.classList.toggle("wave3", wave >= 3);
-    }
-
-    function getWaveForProgress(p) {
-      if (p >= 0.74) return 3;
-      if (p >= 0.42) return 2;
-      if (p >= 0.12) return 1;
-      return 0;
-    }
-
-    function tick() {
-      requestHeightSend();
-      if (reduceMotion) {
-        // Show everything immediately.
-        for (const m of sceneMetrics) {
-          if (m.panel) setWave(m.panel, 3);
-          if (m.img) m.img.style.transform = "translate3d(0, 0px, 0)";
-          for (const a of m.accents) a.el.style.setProperty("--p", "0px");
-        }
-        return;
-      }
-
-      const viewportH = scroller ? scroller.clientHeight : window.innerHeight;
-      const scrollTop = scroller ? scroller.scrollTop : 0;
-
-      for (const m of sceneMetrics) {
-        if (!m.panel) continue;
-
-        const raw = (scrollTop - m.top) / m.scrollSpan;
-        const p = Math.max(0, Math.min(1, raw));
-        const wave = getWaveForProgress(p);
-        setWave(m.panel, wave);
-
-        // Background parallax (fullscreen cover)
-        if (m.img) {
-          if (m.parallaxMode === "off" || m.parallaxMode === "none" || m.parallaxMode === "0") {
-            m.img.style.transform = "translate3d(0, 0px, 0)";
-          } else {
-            // Don't start parallax immediately; hold the background steady until
-            // the user has scrolled further into the scene.
-            const start = Math.max(0, Math.min(0.95, parseFloat(m.panel.getAttribute("data-parallax-start") || "0")));
-            if (p <= start) {
-              m.img.style.transform = "translate3d(0, 0px, 0)";
-              continue;
-            }
-
-            const pn = (p - start) / (1 - start);
-            const centered = (pn - 0.5) * 2; // -1..+1
-            const amp = Math.max(0, Math.min(220, parseFloat(m.panel.getAttribute("data-bg-amp") || "36")));
-            const y = Math.round(centered * m.bgSpeed * amp);
-            m.img.style.transform = `translate3d(0, ${y}px, 0)`;
-          }
+        function info(el) {
+          if (!el) return null;
+          const cs = getComputedStyle(el);
+          return {
+            tag: el.className || el.id || el.tagName,
+            zIndex: cs.zIndex,
+            position: cs.position,
+            transform: cs.transform,
+          };
         }
 
-        // Accent drift (subtle)
-        const centered = (p - 0.5) * 2;
-        for (const a of m.accents) {
-          const y = Math.round(centered * -a.speed * 22);
-          a.el.style.setProperty("--p", `${y}px`);
-        }
+        console.log("STACK DEBUG hero-inner:", info(hs));
+        console.log("STACK DEBUG sectionCover:", info(cover));
+        console.log("STACK DEBUG cover-box:", info(coverBox));
+        console.log("STACK DEBUG keyart:", info(keyart));
+
+        [hs, cover, coverBox, keyart].forEach((el, i) => {
+          if (!el) return;
+          el.style.outline =
+            [
+              "2px solid yellow",
+              "2px solid red",
+              "2px solid cyan",
+              "2px solid magenta",
+            ][i] || "2px solid lime";
+        });
+      } catch (e) {
+        console.error(e);
       }
-    }
-
-    function loop() {
-      tick();
-      requestAnimationFrame(loop);
-    }
-
-    // Start: don't block load; wait one frame.
-    requestAnimationFrame(() => {
-      requestHeightSend();
-      loop();
     });
   </script>
-</body>
 </html>
