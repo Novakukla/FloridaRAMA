@@ -128,6 +128,8 @@ function classifySource(url, title) {
 	const floridaKeywords = [
 		"florida","miami","tampa","orlando","jacksonville","tallahassee",
 		"fortmyers","fort-myers","stpetersburg","st.-petersburg","st-petersburg",
+		// added St. Pete variants + explicit St. Pete Catalyst hostname
+		"stpete","st.-pete","st-pete","st.pete","st pete","stpetecatalyst",
 		"westpalm","west-palm","palmbeach","broward","duval","lee","sarasota",
 		"pensacola","naples","capecoral","ocala","daytona","portstlucie","manatee",
 		"pinellas","collier","hendry","monroe","lee-county","boca","delray","staugustine"
