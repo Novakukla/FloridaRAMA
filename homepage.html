@@ -25,7 +25,7 @@
             <div class="hero-inner">
               <img class="hero-logo step" data-step="1" src="assets/logolong.png" alt="FloridaRAMA" />
               <div class="tagline step" data-step="2">
-                Cooler than a museum • Smarter than a theme park • Weirder than
+                Cooler than a museum ✧ Smarter than a theme park ✧ Weirder than
                 a carnival
               </div>
 
@@ -62,15 +62,6 @@
                 <img class="feature right" src="assets/giftbox.png" alt="Gift box" />
               </div>
             </div>
-            
-            <div class="shape-divider" aria-hidden="true">
-              <img src="assets/shapeDivider.svg" alt="" />
-            </div>
-            <div class="cover-inner">
-            </div>
-          </section>
-
-          <section class="section sectionBlack" id="sectionCover">
             <h2>Why Visit FloridaRAMA?</h2>
             <ul>
               <li>Cooler than a museum, smarter than a theme park, and weirder than a carnival.</li>
@@ -82,7 +73,18 @@
               <li>Also Tampa Bay’s most unique events venue.</li>
               <li>Host private gatherings, corporate events, social affairs, kids’ parties, and more.</li>
             </ul>
+            
+            <div class="shape-divider" aria-hidden="true">
+              <img src="assets/shapeDivider.svg" alt="" />
+            </div>
+            <div class="cover-inner">
+            </div>
+
+            
           </section>
+
+          <section class="section sectionBlack" id="sectionCover">
+            
           </section>
         </main>
       </div>
@@ -91,44 +93,5 @@
     <footer>© 2025 FloridaRAMA — Local starter copy for development</footer>
   </body>
   <script src="js/main.js" defer></script>
-  <!-- DEBUG: stacking inspector (remove when done) -->
-  <script>
-    window.addEventListener("load", () => {
-      try {
-        const hs = document.querySelector(".hero-inner");
-        const cover = document.getElementById("sectionCover");
-        const coverBox = document.querySelector(".sectionBlack .cover-box");
-        const keyart = document.querySelector(".keyart");
-
-        function info(el) {
-          if (!el) return null;
-          const cs = getComputedStyle(el);
-          return {
-            tag: el.className || el.id || el.tagName,
-            zIndex: cs.zIndex,
-            position: cs.position,
-            transform: cs.transform,
-          };
-        }
-
-        console.log("STACK DEBUG hero-inner:", info(hs));
-        console.log("STACK DEBUG sectionCover:", info(cover));
-        console.log("STACK DEBUG cover-box:", info(coverBox));
-        console.log("STACK DEBUG keyart:", info(keyart));
-
-        [hs, cover, coverBox, keyart].forEach((el, i) => {
-          if (!el) return;
-          el.style.outline =
-            [
-              "2px solid yellow",
-              "2px solid red",
-              "2px solid cyan",
-              "2px solid magenta",
-            ][i] || "2px solid lime";
-        });
-      } catch (e) {
-        console.error(e);
-      }
-    });
-  </script>
+  
 </html>
